@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About — Aethernet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F1ECDF;--paper-2:#E9E2D0;--surface:#F7F3E8;
+  --ink:#15140F;--ink-soft:#4A463C;--ink-mute:#807866;
+  --hair:rgba(21,20,15,.14);--hair-strong:rgba(21,20,15,.32);
+  --moss:#4F6A3D;--moss-soft:#DCE2C9;
+  --ochre:#A8772B;--ochre-soft:#EDDFBE;
+  --rust:#9A3F22;
+  --sky:#3A5E73;--sky-soft:#C9D8DE;
+  --display:"Instrument Serif","Times New Roman",serif;
+  --sans:"IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+  --r:4px;--transition:200ms cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+html{scroll-behavior:smooth}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+a{color:inherit;text-decoration:none}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-weight:400;font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;background-image:radial-gradient(circle at 18% 22%,rgba(168,119,43,.06),transparent 45%),radial-gradient(circle at 82% 78%,rgba(79,106,61,.05),transparent 50%),url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.08  0 0 0 0 0.08  0 0 0 0 0.06  0 0 0 0.32 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.55'/></svg>");mix-blend-mode:multiply;opacity:.45}
+#progress{position:fixed;top:0;left:0;right:0;height:2px;background:var(--moss);transform-origin:left;transform:scaleX(0);z-index:100;opacity:.7;transition:transform .1s linear}
+.wrap{position:relative;z-index:2;max-width:1240px;margin:0 auto;padding:0 32px}
+
+.status{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--ink-soft);border-bottom:1px solid var(--hair);background:rgba(241,236,223,.85);backdrop-filter:saturate(120%) blur(8px);position:sticky;top:0;z-index:50}
+.status .row{display:flex;align-items:center;gap:18px;padding:9px 0;flex-wrap:wrap}
+.status .sep{opacity:.4}
+.status .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--moss);margin-right:7px;vertical-align:middle;box-shadow:0 0 0 3px rgba(79,106,61,.18);animation:pulse 3.2s ease-in-out infinite}
+.status .right{margin-left:auto;display:flex;gap:18px;flex-wrap:wrap}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(79,106,61,.18)}50%{box-shadow:0 0 0 6px rgba(79,106,61,.05)}}
+.mast{display:flex;align-items:center;justify-content:space-between;padding:24px 0;border-bottom:1px solid var(--hair)}
+.mast .brand{font-family:var(--display);font-size:32px;line-height:1;letter-spacing:-.01em;display:flex;align-items:center;gap:14px}
+.mast .brand .glyph{width:28px;height:28px;border:1px solid var(--ink);border-radius:50%;position:relative;flex:none}
+.mast .brand .glyph::before,.mast .brand .glyph::after{content:"";position:absolute;background:var(--ink)}
+.mast .brand .glyph::before{left:50%;top:4px;bottom:4px;width:1px;transform:translateX(-.5px)}
+.mast .brand .glyph::after{top:50%;left:4px;right:4px;height:1px;transform:translateY(-.5px)}
+.mast nav{display:flex;gap:26px;font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+.mast nav a{padding-bottom:2px;border-bottom:1px solid transparent;transition:border-color var(--transition),color var(--transition)}
+.mast nav a:hover{color:var(--ink);border-color:var(--ink-mute)}
+.mast nav a.current{color:var(--ink);border-color:var(--ink)}
+.mast .nav-cta{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:8px 14px;border:1px solid var(--ink);border-radius:999px;color:var(--ink);transition:background var(--transition),color var(--transition)}
+.mast .nav-cta:hover{background:var(--ink);color:var(--paper)}
+
+/* hero */
+.hero{padding:80px 0 90px;border-bottom:1px solid var(--hair)}
+.hero .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--moss);margin-bottom:20px}
+.hero h1{font-family:var(--display);font-weight:400;font-size:clamp(54px,7vw,100px);line-height:.93;letter-spacing:-.025em;margin:0 0 32px;max-width:18ch}
+.hero h1 em{font-style:italic;color:var(--moss)}
+.hero .lede{font-family:var(--display);font-style:italic;font-size:22px;line-height:1.45;color:var(--ink-soft);max-width:60ch;margin:0 0 28px}
+.hero .meta{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute)}
+
+/* sections */
+section{padding:72px 0}
+section+section{border-top:1px solid var(--hair)}
+.section-head{display:flex;align-items:baseline;justify-content:space-between;gap:24px;margin-bottom:40px;border-bottom:1px solid var(--hair);padding-bottom:20px}
+.section-head .num{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--ink-mute);text-transform:uppercase}
+.section-head h2{font-family:var(--display);font-weight:400;font-size:clamp(32px,3.6vw,46px);letter-spacing:-.01em;margin:0;line-height:1.1}
+.section-head .aside{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-mute);max-width:260px;text-align:right;line-height:1.6}
+
+/* thesis */
+.thesis{display:grid;grid-template-columns:1fr 1.1fr;gap:64px;align-items:start}
+.thesis .body p{font-size:17px;line-height:1.7;color:var(--ink-soft);margin:0 0 20px;max-width:56ch}
+.thesis .body p b{color:var(--ink);font-weight:500}
+.thesis .body p:last-child{margin:0}
+.thesis-pull{background:var(--surface);border:1px solid var(--hair);border-radius:var(--r);padding:28px 28px 24px}
+.thesis-pull blockquote{font-family:var(--display);font-style:italic;font-size:26px;line-height:1.35;letter-spacing:-.01em;color:var(--ink);margin:0 0 20px}
+.thesis-pull cite{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute);font-style:normal}
+
+/* problem list */
+.problem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--hair);border-radius:var(--r);background:var(--surface);overflow:hidden}
+.problem{padding:26px 24px;border-right:1px solid var(--hair);border-bottom:1px solid var(--hair)}
+.problem:nth-child(3n){border-right:0}
+.problem:nth-last-child(-n+3){border-bottom:0}
+.problem .p-n{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--rust);margin-bottom:10px}
+.problem h3{font-family:var(--display);font-size:20px;font-weight:400;line-height:1.1;letter-spacing:-.005em;margin:0 0 8px}
+.problem p{font-size:13.5px;color:var(--ink-soft);margin:0;line-height:1.5}
+
+/* answer */
+.answer{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--hair);border-radius:var(--r);background:var(--surface);overflow:hidden}
+.answer-left{padding:36px;border-right:1px solid var(--hair)}
+.answer-right{padding:36px}
+.answer h3{font-family:var(--display);font-weight:400;font-size:32px;line-height:1.1;letter-spacing:-.01em;margin:0 0 16px}
+.answer p{font-size:15px;color:var(--ink-soft);margin:0 0 14px;line-height:1.6;max-width:48ch}
+.answer p:last-child{margin:0}
+.answer p b{color:var(--ink);font-weight:500}
+.answer-list{list-style:none;padding:0;margin:20px 0 0;display:flex;flex-direction:column;gap:12px}
+.answer-list li{display:grid;grid-template-columns:22px 1fr;gap:10px;font-size:14px;color:var(--ink-soft);line-height:1.45}
+.answer-list li::before{content:attr(data-n);font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--ink-mute);padding-top:2px}
+.answer-list li b{color:var(--ink);font-weight:500}
+
+/* use case cards */
+.use-cases{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.use-case{background:var(--surface);border:1px solid var(--hair);border-radius:var(--r);padding:24px}
+.use-case .uc-tag{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:12px}
+.use-case h3{font-family:var(--display);font-size:22px;font-weight:400;line-height:1.1;letter-spacing:-.005em;margin:0 0 10px}
+.use-case p{font-size:13.5px;color:var(--ink-soft);margin:0;line-height:1.5}
+
+/* infra */
+.infra{display:grid;grid-template-columns:1.2fr 1fr;gap:56px;align-items:start}
+.infra .body p{font-size:16px;line-height:1.65;color:var(--ink-soft);margin:0 0 18px;max-width:52ch}
+.infra .body p b{color:var(--ink);font-weight:500}
+.infra-list{background:var(--surface);border:1px solid var(--hair);border-radius:var(--r);padding:24px}
+.infra-list .il-head{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:16px}
+.infra-item{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--hair);align-items:start}
+.infra-item:last-child{border-bottom:0;padding-bottom:0}
+.infra-item .ii-n{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--ink-mute);padding-top:2px;flex:none;width:24px}
+.infra-item .ii-text{font-size:14px;color:var(--ink-soft);line-height:1.45}
+.infra-item .ii-text b{color:var(--ink);font-weight:500}
+
+/* values */
+.values{display:grid;grid-template-columns:repeat(2,1fr);gap:0;border:1px solid var(--hair);border-radius:var(--r);background:var(--surface);overflow:hidden}
+.value{padding:28px;border-right:1px solid var(--hair);border-bottom:1px solid var(--hair)}
+.value:nth-child(2n){border-right:0}
+.value:nth-last-child(-n+2){border-bottom:0}
+.value .v-n{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--moss);margin-bottom:10px}
+.value h3{font-family:var(--display);font-size:22px;font-weight:400;line-height:1.1;letter-spacing:-.005em;margin:0 0 10px}
+.value p{font-size:13.5px;color:var(--ink-soft);margin:0;line-height:1.5}
+
+/* fade/reveal */
+.fade-in{opacity:0;transform:translateY(18px);transition:opacity .7s cubic-bezier(.2,.65,.2,1),transform .7s cubic-bezier(.2,.65,.2,1)}
+.fade-in.visible{opacity:1;transform:none}
+.reveal{opacity:0;transform:translateY(14px);animation:reveal .8s cubic-bezier(.2,.65,.2,1) forwards}
+.reveal-1{animation-delay:.04s}.reveal-2{animation-delay:.16s}.reveal-3{animation-delay:.28s}.reveal-4{animation-delay:.42s}
+@keyframes reveal{to{opacity:1;transform:none}}
+
+/* footer */
+footer{border-top:1px solid var(--hair);padding:40px 0 56px}
+.footer-inner{display:grid;grid-template-columns:1fr auto;gap:32px;align-items:start}
+.footer-brand{font-family:var(--display);font-size:22px;letter-spacing:-.01em;margin-bottom:10px}
+.footer-desc{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ink-mute);text-transform:uppercase;line-height:1.7;max-width:40ch}
+.footer-links{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.footer-links a{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute);padding:6px 12px;border:1px solid var(--hair);border-radius:999px;transition:color var(--transition),border-color var(--transition)}
+.footer-links a:hover{color:var(--ink);border-color:var(--hair-strong)}
+.footer-nav{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-mute);display:flex;flex-direction:column;gap:12px;text-align:right}
+.footer-nav a:hover{color:var(--ink)}
+.footer-copy{margin-top:40px;padding-top:20px;border-top:1px solid var(--hair);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--ink-mute);text-transform:uppercase}
+
+@media(max-width:980px){
+  .thesis{grid-template-columns:1fr;gap:32px}
+  .problem-grid{grid-template-columns:1fr 1fr}
+  .problem:nth-child(2n){border-right:0}
+  .problem:nth-child(3n){border-right:1px solid var(--hair)}
+  .problem:nth-child(2n){border-right:0}
+  .answer{grid-template-columns:1fr}
+  .answer-left{border-right:0;border-bottom:1px solid var(--hair)}
+  .use-cases{grid-template-columns:1fr 1fr}
+  .infra{grid-template-columns:1fr;gap:32px}
+  .footer-inner{grid-template-columns:1fr}
+  .footer-nav{text-align:left}
+}
+@media(max-width:640px){
+  .wrap{padding:0 20px}
+  .problem-grid{grid-template-columns:1fr}
+  .problem{border-right:0}
+  .use-cases{grid-template-columns:1fr}
+  .values{grid-template-columns:1fr}
+  .value{border-right:0}
+  .value:nth-last-child(-n+2){border-bottom:1px solid var(--hair)}
+  .value:last-child{border-bottom:0}
+  .mast nav{display:none}
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div class="status">
+  <div class="wrap row">
+    <span><span class="dot"></span>AETHERNET · OPERATIONAL</span>
+    <span class="sep">·</span><span>NODE STEWARD‑LOCAL</span>
+    <span class="sep">·</span><span>SIGNED BUNDLE 2026.05.W3</span>
+    <div class="right"><span id="ts">— · —</span><span class="sep">·</span><span>v0.1 PROTOTYPE</span></div>
+  </div>
+</div>
+<div class="wrap">
+  <header class="mast">
+    <div class="brand">
+      <span class="glyph" aria-hidden="true"></span>
+      <a href="index.html">Aethernet</a>
+    </div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="product.html">Steward</a>
+      <a href="about.html" class="current">About</a>
+    </nav>
+    <a href="index.html#console" class="nav-cta">Try console →</a>
+  </header>
+
+  <!-- hero -->
+  <section class="hero" style="border-top:0;padding-top:68px">
+    <div class="kicker reveal reveal-1">§ 00 — Who we are</div>
+    <h1 class="reveal reveal-2">A mission,<br>not a <em>feature.</em></h1>
+    <p class="lede reveal reveal-3">Aethernet is built on a single belief: the next major opportunity in AI is not bigger models. It is trust, restraint, privacy, and responsible infrastructure.</p>
+    <div class="meta reveal reveal-4">Founded on the principle that AI should help people use AI — only when AI is actually the right answer</div>
+  </section>
+
+  <!-- thesis -->
+  <section id="thesis">
+    <div class="section-head fade-in">
+      <div>
+        <div class="num">§ 01 — Founder thesis</div>
+        <h2 style="margin-top:6px">The case for restraint.</h2>
+      </div>
+      <div class="aside">Why we think the race to more AI is the wrong race.</div>
+    </div>
+    <div class="thesis fade-in">
+      <div class="body">
+        <p>The AI industry optimizes for <b>engagement</b>. More questions asked, more tokens generated, more cloud compute consumed. This is good for infrastructure companies and investors. It is not necessarily good for people.</p>
+        <p>Most AI products push users toward AI for everything — even when a calculator, a web search, a spreadsheet, or a phone call would be faster, more accurate, and far less energy-intensive.</p>
+        <p>The environmental cost of each interaction is invisible. The privacy cost is buried in terms of service. The bandwidth cost is absorbed silently. The data dependency is treated as normal.</p>
+        <p>Aethernet is built on the belief that <b>the next major AI opportunity is not more AI — it is appropriate AI</b>. Products that are honest about when AI helps and when it doesn't. Systems that show their resource cost rather than hiding it. Infrastructure that works offline, updates on your schedule, and never moves your data without telling you.</p>
+        <p>This is AI for people who want intelligence without surrendering privacy, money, attention, or environmental responsibility.</p>
+      </div>
+      <div>
+        <div class="thesis-pull">
+          <blockquote>"The next major AI opportunity is not simply bigger models. It is trust, restraint, privacy, and responsible infrastructure."</blockquote>
+          <cite>Aethernet · Founder thesis · 2026</cite>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- problem -->
+  <section id="problem">
+    <div class="section-head fade-in">
+      <div>
+        <div class="num">§ 02 — The problem</div>
+        <h2 style="margin-top:6px">What current AI gets wrong.</h2>
+      </div>
+      <div class="aside">Not a critique of AI. A critique of how it's deployed.</div>
+    </div>
+    <div class="problem-grid fade-in">
+      <div class="problem">
+        <div class="p-n">01 · Dependence</div>
+        <h3>Cloud‑dependent by default</h3>
+        <p>Every question leaves your home. Every answer requires a data center. Every interaction is a network call you didn't choose to make.</p>
+      </div>
+      <div class="problem">
+        <div class="p-n">02 · Cost</div>
+        <h3>Energy‑intensive and opaque</h3>
+        <p>A single cloud AI response can use more energy than a web search by orders of magnitude. Users never see this. They are never asked to care.</p>
+      </div>
+      <div class="problem">
+        <div class="p-n">03 · Trust</div>
+        <h3>Updates without announcement</h3>
+        <p>The model you used last week is different from the model you use today. No notification. No changelog. No way to verify what changed.</p>
+      </div>
+      <div class="problem">
+        <div class="p-n">04 · Engagement</div>
+        <h3>AI is pushed for everything</h3>
+        <p>Products optimize for AI engagement. They never tell you that a web search, a calculator, or a direct database would be more accurate and use far less compute.</p>
+      </div>
+      <div class="problem">
+        <div class="p-n">05 · Privacy</div>
+        <h3>Data moves without notice</h3>
+        <p>What gets sent to the cloud? What is stored? For how long? These questions have answers buried in policy documents most users never read.</p>
+      </div>
+      <div class="problem">
+        <div class="p-n">06 · Resilience</div>
+        <h3>Fails without connectivity</h3>
+        <p>Rural areas, low-bandwidth environments, emergencies, and off-grid settings are treated as edge cases. AI that requires constant internet is not infrastructure.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- answer -->
+  <section id="answer">
+    <div class="section-head fade-in">
+      <div>
+        <div class="num">§ 03 — The answer</div>
+        <h2 style="margin-top:6px">Build an AI that is honest about its own use.</h2>
+      </div>
+      <div class="aside">Not more AI. Better AI, used deliberately.</div>
+    </div>
+    <div class="answer fade-in">
+      <div class="answer-left">
+        <h3>What Aethernet does differently</h3>
+        <p>Aethernet routes requests to the <b>least expensive, most appropriate answer</b> — whether that's local AI, web search, or cloud reasoning. It tells you which it used and why.</p>
+        <p>It shows the estimated environmental impact of each response. Not to create guilt, but to create awareness. Informed use is better use.</p>
+        <p>It updates on your schedule, with signed bundles you can verify. It works offline. It keeps an open audit log. It tells you when to use search instead of AI.</p>
+      </div>
+      <div class="answer-right">
+        <h3>The core principles</h3>
+        <ul class="answer-list">
+          <li data-n="01"><span><b>Privacy first.</b> Personal data stays local. Cloud use is optional, visible, and justified.</span></li>
+          <li data-n="02"><span><b>Low-energy by default.</b> Lightweight local answers preferred unless deeper reasoning is needed.</span></li>
+          <li data-n="03"><span><b>Transparent compute.</b> Every request shows its routing, privacy status, and resource impact.</span></li>
+          <li data-n="04"><span><b>Slow updates.</b> Signed bundles on your schedule. Weekly by default. Manual if you prefer.</span></li>
+          <li data-n="05"><span><b>Offline-first resilience.</b> Local knowledge packs. No constant internet dependency.</span></li>
+          <li data-n="06"><span><b>Honest routing.</b> Aethernet tells you when search, a calculator, or a direct source is better.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- who it's for -->
+  <section id="who">
+    <div class="section-head fade-in">
+      <div>
+        <div class="num">§ 04 — Who it's for</div>
+        <h2 style="margin-top:6px">Real life, not enterprise scale.</h2>
+      </div>
+      <div class="aside">Six communities that deserve AI built for them.</div>
+    </div>
+    <div class="use-cases fade-in">
+      <div class="use-case">
+        <div class="uc-tag">01 · Household</div>
+        <h3>Families</h3>
+        <p>Private AI for planning, learning, schedules, documents, and safe search guidance. Your home data stays home.</p>
+      </div>
+      <div class="use-case">
+        <div class="uc-tag">02 · Commerce</div>
+        <h3>Small businesses</h3>
+        <p>Low-cost AI for operations, writing, customer service, research, and document organization — without enterprise pricing.</p>
+      </div>
+      <div class="use-case">
+        <div class="uc-tag">03 · Creative</div>
+        <h3>Artists & studios</h3>
+        <p>Private archive assistant, image cataloging, writing support, planning, and project management without cloud exposure.</p>
+      </div>
+      <div class="use-case">
+        <div class="uc-tag">04 · Education</div>
+        <h3>Schools & libraries</h3>
+        <p>Transparent AI with offline packs, education bundles, reduced cloud exposure, and lower cost for institutions.</p>
+      </div>
+      <div class="use-case">
+        <div class="uc-tag">05 · Connectivity</div>
+        <h3>Rural communities</h3>
+        <p>AI that works with intermittent connectivity, slow update cycles, and low bandwidth — not despite them.</p>
+      </div>
+      <div class="use-case">
+        <div class="uc-tag">06 · Resilience</div>
+        <h3>Emergency use</h3>
+        <p>Offline knowledge packs, local maps, public safety information, medical basics, and community broadcast updates.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- infrastructure vision -->
+  <section id="infra">
+    <div class="section-head fade-in">
+      <div>
+        <div class="num">§ 05 — Infrastructure vision</div>
+        <h2 style="margin-top:6px">Aethernet as a distribution layer.</h2>
+      </div>
+      <div class="aside">Long-term · beyond the device</div>
+    </div>
+    <div class="infra fade-in">
+      <div class="body">
+        <p>Steward is the first product. Aethernet is the layer beneath it — a <b>low-bandwidth, one-way distribution network</b> for responsible AI updates, knowledge packs, and civic information.</p>
+        <p>The goal is to reduce unnecessary repeated cloud calls and create a resilient distribution system for communities, devices, and institutions that cannot depend on constant connectivity.</p>
+        <p>Think of it as a <b>postal system for AI</b>. Signed. Verified. Scheduled. Addressed to specific communities with specific needs. Not a firehose of continuous updates, but a considered, deliberate flow of intelligence.</p>
+      </div>
+      <div class="infra-list">
+        <div class="il-head">What the network delivers</div>
+        <div class="infra-item"><span class="ii-n">01</span><div class="ii-text"><b>Signed model patches</b> — incremental updates, cryptographically verified</div></div>
+        <div class="infra-item"><span class="ii-n">02</span><div class="ii-text"><b>Knowledge packs</b> — curated local and domain-specific information bundles</div></div>
+        <div class="infra-item"><span class="ii-n">03</span><div class="ii-text"><b>Offline maps</b> — local geographic data for disconnected use</div></div>
+        <div class="infra-item"><span class="ii-n">04</span><div class="ii-text"><b>Public safety updates</b> — emergency broadcast and civic information</div></div>
+        <div class="infra-item"><span class="ii-n">05</span><div class="ii-text"><b>Education packs</b> — curriculum-aligned knowledge for schools and libraries</div></div>
+        <div class="infra-item"><span class="ii-n">06</span><div class="ii-text"><b>Civic information</b> — local government, services, and public records</div></div>
+        <div class="infra-item"><span class="ii-n">07</span><div class="ii-text"><b>Low-bandwidth AI updates</b> — designed for rural and intermittent connectivity</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- values -->
+  <section id="values">
+    <div class="section-head fade-in">
+      <div>
+        <div class="num">§ 06 — Values</div>
+        <h2 style="margin-top:6px">What we actually believe.</h2>
+      </div>
+      <div class="aside">Design decisions follow from values, not the other way around.</div>
+    </div>
+    <div class="values fade-in">
+      <div class="value">
+        <div class="v-n">01 · Restraint</div>
+        <h3>Appropriate use over maximum use</h3>
+        <p>We optimize for the right answer, not the most AI answer. If search is better, we say so. If a calculator is better, we route there. We do not optimize for engagement.</p>
+      </div>
+      <div class="value">
+        <div class="v-n">02 · Honesty</div>
+        <h3>Visible cost, visible routing</h3>
+        <p>Every request shows its routing decision, privacy exposure, and estimated environmental impact. We do not hide what AI costs to run.</p>
+      </div>
+      <div class="value">
+        <div class="v-n">03 · Privacy</div>
+        <h3>Local by default, cloud by choice</h3>
+        <p>Personal data stays on your device unless you decide otherwise. Cloud use is visible, announced, and justified. No silent transfers.</p>
+      </div>
+      <div class="value">
+        <div class="v-n">04 · Resilience</div>
+        <h3>Works when the internet doesn't</h3>
+        <p>AI that requires constant connectivity is not infrastructure. Aethernet is designed to work offline, update slowly, and function in low-bandwidth environments.</p>
+      </div>
+      <div class="value">
+        <div class="v-n">05 · Trust</div>
+        <h3>Verified, signed, auditable</h3>
+        <p>Every update is a signed bundle. Every request is logged locally. Every routing decision is visible. You should be able to verify what your AI is doing.</p>
+      </div>
+      <div class="value">
+        <div class="v-n">06 · Scale that fits</div>
+        <h3>Human-scale intelligence</h3>
+        <p>This is not a race to build the biggest model. It is a system for daily life — writing, planning, learning, archiving, and decision-making at a human scale.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand">Aethernet</div>
+        <div class="footer-desc">Responsible AI infrastructure for ordinary people,<br>small businesses, schools, studios, families, and communities.</div>
+        <div class="footer-links">
+          <a href="index.html">Home</a>
+          <a href="product.html">Steward</a>
+          <a href="manifesto.md">Manifesto</a>
+          <a href="roadmap.md">Roadmap</a>
+        </div>
+      </div>
+      <nav class="footer-nav">
+        <a href="#thesis">Thesis</a>
+        <a href="#problem">Problem</a>
+        <a href="#who">Who it's for</a>
+        <a href="#values">Values</a>
+      </nav>
+    </div>
+    <div class="footer-copy">
+      <span>Aethernet · Privacy‑first · Low‑energy · Transparent</span>
+      <span>v0.1 · prototype · placeholder data</span>
+    </div>
+  </footer>
+</div>
+
+<script>
+const progressBar=document.getElementById('progress');
+window.addEventListener('scroll',()=>{const h=document.documentElement;progressBar.style.transform=`scaleX(${h.scrollTop/(h.scrollHeight-h.clientHeight)})`;},{passive:true});
+function stamp(){const d=new Date(),pad=n=>String(n).padStart(2,'0');return `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} · ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`}
+function tick(){document.getElementById('ts').textContent=stamp()}tick();setInterval(tick,1000);
+const fader=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');fader.unobserve(e.target)}})},{rootMargin:'0px 0px -80px 0px'});
+document.querySelectorAll('.fade-in').forEach(el=>fader.observe(el));
+</script>
+</body>
+</html>

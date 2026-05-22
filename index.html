@@ -1,0 +1,1450 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aethernet — AI for the rest of us</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ------- tokens ------- */
+:root{
+  --paper:        #F1ECDF;
+  --paper-2:      #E9E2D0;
+  --surface:      #F7F3E8;
+  --ink:          #15140F;
+  --ink-soft:     #4A463C;
+  --ink-mute:     #807866;
+  --hair:         rgba(21,20,15,.14);
+  --hair-strong:  rgba(21,20,15,.32);
+
+  --moss:         #4F6A3D;
+  --moss-soft:    #DCE2C9;
+  --ochre:        #A8772B;
+  --ochre-soft:   #EDDFBE;
+  --rust:         #9A3F22;
+  --rust-soft:    #ECC9B6;
+  --sky:          #3A5E73;
+  --sky-soft:     #C9D8DE;
+
+  --display: "Instrument Serif", "Times New Roman", serif;
+  --sans:    "IBM Plex Sans", system-ui, sans-serif;
+  --mono:    "IBM Plex Mono", ui-monospace, monospace;
+
+  --r: 4px;
+  --transition: 200ms cubic-bezier(.4,0,.2,1);
+}
+
+/* ------- reset ------- */
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+html{scroll-behavior:smooth}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+input,textarea{font:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+
+/* ------- base ------- */
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-weight:400;
+  font-size:15px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  position:relative;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* paper grain */
+body::before{
+  content:"";
+  position:fixed;inset:0;
+  pointer-events:none;
+  z-index:1;
+  background-image:
+    radial-gradient(circle at 18% 22%, rgba(168,119,43,.06), transparent 45%),
+    radial-gradient(circle at 82% 78%, rgba(79,106,61,.05), transparent 50%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.08  0 0 0 0 0.08  0 0 0 0 0.06  0 0 0 0.32 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.55'/></svg>");
+  mix-blend-mode:multiply;
+  opacity:.45;
+}
+
+/* ------- progress bar ------- */
+#progress{
+  position:fixed;top:0;left:0;right:0;height:2px;
+  background:var(--moss);
+  transform-origin:left;
+  transform:scaleX(0);
+  z-index:100;
+  transition:transform .1s linear;
+  opacity:.7;
+}
+
+/* ------- layout ------- */
+.wrap{
+  position:relative;z-index:2;
+  max-width:1240px;
+  margin:0 auto;
+  padding:0 32px;
+}
+
+/* ------- top status bar ------- */
+.status{
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.04em;
+  color:var(--ink-soft);
+  border-bottom:1px solid var(--hair);
+  background:rgba(241,236,223,.85);
+  backdrop-filter:saturate(120%) blur(8px);
+  position:sticky;top:0;z-index:50;
+}
+.status .row{
+  display:flex;align-items:center;gap:18px;
+  padding:9px 0;
+  flex-wrap:wrap;
+}
+.status .sep{opacity:.4}
+.status .dot{
+  display:inline-block;width:7px;height:7px;border-radius:50%;
+  background:var(--moss);margin-right:7px;vertical-align:middle;
+  box-shadow:0 0 0 3px rgba(79,106,61,.18);
+  animation:pulse 3.2s ease-in-out infinite;
+}
+.status .right{margin-left:auto;display:flex;gap:18px;flex-wrap:wrap}
+@keyframes pulse{
+  0%,100%{box-shadow:0 0 0 3px rgba(79,106,61,.18)}
+  50%{box-shadow:0 0 0 6px rgba(79,106,61,.05)}
+}
+
+/* ------- masthead ------- */
+.mast{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:24px 0;
+  border-bottom:1px solid var(--hair);
+}
+.mast .brand{
+  font-family:var(--display);
+  font-size:32px;line-height:1;letter-spacing:-.01em;
+  display:flex;align-items:center;gap:14px;
+}
+.mast .brand .glyph{
+  width:28px;height:28px;
+  border:1px solid var(--ink);
+  border-radius:50%;
+  position:relative;
+  flex:none;
+}
+.mast .brand .glyph::before,
+.mast .brand .glyph::after{
+  content:"";position:absolute;background:var(--ink);
+}
+.mast .brand .glyph::before{
+  left:50%;top:4px;bottom:4px;width:1px;transform:translateX(-.5px);
+}
+.mast .brand .glyph::after{
+  top:50%;left:4px;right:4px;height:1px;transform:translateY(-.5px);
+}
+.mast nav{
+  display:flex;gap:26px;
+  font-family:var(--mono);font-size:11.5px;
+  letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-soft);
+}
+.mast nav a{
+  padding-bottom:2px;
+  border-bottom:1px solid transparent;
+  transition:border-color var(--transition), color var(--transition);
+}
+.mast nav a:hover{ color:var(--ink); border-color:var(--ink-mute) }
+.mast nav a.active{ color:var(--ink); border-color:var(--ink) }
+.mast .nav-cta{
+  font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;
+  padding:8px 14px;
+  border:1px solid var(--ink);
+  border-radius:999px;
+  color:var(--ink);
+  transition:background var(--transition), color var(--transition);
+}
+.mast .nav-cta:hover{ background:var(--ink); color:var(--paper) }
+
+/* ------- hero ------- */
+.hero{
+  display:grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap:64px;
+  padding:80px 0 90px;
+  border-bottom:1px solid var(--hair);
+  align-items:start;
+}
+.hero h1{
+  font-family:var(--display);
+  font-weight:400;
+  font-size: clamp(58px, 7.5vw, 108px);
+  line-height:.94;
+  letter-spacing:-.025em;
+  margin:0 0 28px;
+}
+.hero h1 em{
+  font-style:italic;
+  color:var(--moss);
+}
+.hero .lede{
+  font-family:var(--display);
+  font-style:italic;
+  font-size:22px;
+  line-height:1.42;
+  color:var(--ink-soft);
+  max-width:52ch;
+  margin:0 0 32px;
+}
+.hero .meta{
+  font-family:var(--mono);font-size:11px;
+  letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-mute);
+}
+.hero .actions{
+  display:flex;align-items:center;gap:16px;
+  margin-top:30px;flex-wrap:wrap;
+}
+.btn-primary{
+  font-family:var(--mono);font-size:11px;letter-spacing:.12em;
+  text-transform:uppercase;
+  padding:11px 20px;
+  border:1px solid var(--ink);
+  border-radius:999px;
+  background:var(--ink);
+  color:var(--paper);
+  transition:background var(--transition), color var(--transition);
+}
+.btn-primary:hover{ background:var(--ink-soft); border-color:var(--ink-soft) }
+.btn-ghost{
+  font-family:var(--mono);font-size:11px;letter-spacing:.12em;
+  text-transform:uppercase;
+  padding:11px 20px;
+  border:1px solid var(--hair-strong);
+  border-radius:999px;
+  color:var(--ink-soft);
+  transition:border-color var(--transition), color var(--transition);
+}
+.btn-ghost:hover{ border-color:var(--ink); color:var(--ink) }
+
+.hero .side{
+  border-left:1px solid var(--hair);
+  padding-left:32px;
+}
+.hero .side .label{
+  font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-mute);
+  margin-bottom:18px;
+}
+.hero .side .position-item{
+  display:grid;grid-template-columns:auto 1fr;gap:12px;
+  font-size:14.5px;color:var(--ink-soft);line-height:1.5;
+  padding:14px 0;
+  border-bottom:1px solid var(--hair);
+}
+.hero .side .position-item:last-child{ border-bottom:0; padding-bottom:0 }
+.hero .side .position-item::before{
+  content:attr(data-n);
+  font-family:var(--mono);font-size:10px;letter-spacing:.06em;
+  color:var(--ink-mute);padding-top:3px;
+}
+.hero .side b{ color:var(--ink);font-weight:500 }
+
+/* ------- stats strip ------- */
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  border-bottom:1px solid var(--hair);
+}
+.stat{
+  padding:28px 24px;
+  border-right:1px solid var(--hair);
+}
+.stat:last-child{ border-right:0 }
+.stat .num{
+  font-family:var(--display);
+  font-size:clamp(40px,4vw,56px);
+  line-height:1;
+  letter-spacing:-.02em;
+  margin-bottom:8px;
+}
+.stat .num em{ font-style:italic; color:var(--moss) }
+.stat .desc{
+  font-family:var(--mono);font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-mute);
+  line-height:1.5;
+}
+
+/* ------- section structure ------- */
+section{padding:72px 0}
+section + section{border-top:1px solid var(--hair)}
+.section-head{
+  display:flex;align-items:baseline;justify-content:space-between;
+  gap:24px;margin-bottom:40px;
+  border-bottom:1px solid var(--hair);
+  padding-bottom:20px;
+}
+.section-head .num{
+  font-family:var(--mono);font-size:11px;
+  letter-spacing:.14em;color:var(--ink-mute);
+  text-transform:uppercase;
+}
+.section-head h2{
+  font-family:var(--display);font-weight:400;
+  font-size: clamp(32px, 3.6vw, 46px);
+  letter-spacing:-.01em;
+  margin:0;line-height:1.1;
+}
+.section-head .aside{
+  font-family:var(--mono);font-size:11px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-mute);
+  max-width:260px;text-align:right;line-height:1.6;
+}
+
+/* ------- console ------- */
+.console{
+  display:grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap:40px;
+}
+.input-card{
+  background:var(--surface);
+  border:1px solid var(--hair);
+  border-radius:var(--r);
+  padding:22px 22px 18px;
+  display:flex;flex-direction:column;
+}
+.input-head{
+  display:flex;align-items:center;justify-content:space-between;
+  font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-mute);
+  padding-bottom:14px;border-bottom:1px solid var(--hair);
+  margin-bottom:16px;
+}
+.input-head .live{display:flex;align-items:center;gap:8px}
+.input-head .live .d{
+  width:6px;height:6px;border-radius:50%;background:var(--moss);
+  box-shadow:0 0 0 3px rgba(79,106,61,.2);
+  animation:pulse 3s ease-in-out infinite
+}
+.q-input{
+  width:100%;
+  background:transparent;border:0;outline:0;resize:none;
+  font-family:var(--display);font-size:28px;line-height:1.28;
+  color:var(--ink);
+  letter-spacing:-.005em;
+  min-height:110px;
+  overflow:hidden;
+  transition:min-height .2s ease;
+}
+.q-input::placeholder{color:var(--ink-mute);font-style:italic;opacity:.7}
+.input-foot{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-top:16px;padding-top:14px;border-top:1px dashed var(--hair);
+  gap:14px;
+}
+.recommend{
+  font-family:var(--mono);font-size:11.5px;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-soft);
+  display:flex;align-items:center;gap:10px;
+  flex:1;min-width:0;
+}
+.recommend .badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 10px;border-radius:999px;
+  background:var(--moss-soft);color:var(--moss);
+  border:1px solid rgba(79,106,61,.3);
+  font-size:11px;letter-spacing:.06em;
+  flex:none;
+  transition:background var(--transition), color var(--transition), border-color var(--transition);
+}
+.recommend .badge.s{background:var(--sky-soft);color:var(--sky);border-color:rgba(58,94,115,.3)}
+.recommend .badge.o{background:var(--ochre-soft);color:var(--ochre);border-color:rgba(168,119,43,.3)}
+.recommend .badge.r{background:var(--rust-soft);color:var(--rust);border-color:rgba(154,63,34,.3)}
+.recommend .text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
+.submit{
+  font-family:var(--mono);font-size:11px;letter-spacing:.12em;
+  text-transform:uppercase;
+  padding:9px 16px;border:1px solid var(--ink);
+  border-radius:999px;color:var(--ink);
+  transition:background var(--transition),color var(--transition);
+  flex:none;
+}
+.submit:hover{background:var(--ink);color:var(--paper)}
+.submit:active{transform:scale(.97)}
+
+/* ------- mode strip ------- */
+.modes{
+  margin-top:20px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+.mode{
+  text-align:left;
+  background:var(--surface);
+  border:1px solid var(--hair);
+  border-radius:var(--r);
+  padding:16px 14px 14px;
+  transition:border-color var(--transition), background var(--transition), transform var(--transition), box-shadow var(--transition);
+  position:relative;
+  cursor:pointer;
+}
+.mode:hover{
+  border-color:var(--hair-strong);
+  transform:translateY(-1px);
+  box-shadow:0 4px 16px rgba(21,20,15,.07);
+}
+.mode[aria-pressed="true"]{
+  background:#1a1812;
+  color:var(--paper);
+  border-color:#1a1812;
+  box-shadow:0 6px 24px rgba(21,20,15,.18);
+}
+.mode[aria-pressed="true"] .mode-label,
+.mode[aria-pressed="true"] .mode-sub{color:rgba(241,236,223,.6)}
+.mode[aria-pressed="true"] .mode-dot{background:var(--moss)}
+.mode .mode-label{
+  font-family:var(--mono);font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-mute);
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:10px;
+}
+.mode .mode-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--ink-mute);
+  transition:background var(--transition);
+}
+.mode[aria-pressed="true"] .mode-dot{ animation:pulse 2.5s ease-in-out infinite }
+.mode .mode-name{
+  font-family:var(--display);font-size:22px;line-height:1.08;
+  letter-spacing:-.005em;margin:0 0 7px;
+}
+.mode .mode-sub{
+  font-size:12px;color:var(--ink-soft);line-height:1.45;
+}
+
+/* ------- responsible compute panel ------- */
+.compute{
+  background:var(--surface);
+  border:1px solid var(--hair);
+  border-radius:var(--r);
+  padding:22px;
+  display:flex;flex-direction:column;
+  gap:18px;
+  position:sticky;
+  top:calc(36px + 16px);
+}
+.compute-head{
+  display:flex;align-items:baseline;justify-content:space-between;
+  padding-bottom:14px;border-bottom:1px solid var(--hair);
+}
+.compute-head h3{
+  font-family:var(--display);font-weight:400;font-size:22px;
+  margin:0;letter-spacing:-.005em;
+}
+.compute-head .scope{
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-mute);
+}
+.meter{
+  display:grid;
+  grid-template-columns:100px 1fr auto;
+  gap:12px;align-items:center;
+}
+.meter .name{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-soft);
+}
+.meter .bar{
+  height:5px;background:var(--paper-2);border-radius:99px;
+  position:relative;overflow:hidden;
+}
+.meter .bar .fill{
+  position:absolute;inset:0;width:30%;
+  background:var(--moss);
+  border-radius:99px;
+  transition:width .55s cubic-bezier(.6,.05,.2,1), background .3s ease;
+}
+.meter .val{
+  font-family:var(--mono);font-size:11px;letter-spacing:.04em;
+  color:var(--ink);min-width:90px;text-align:right;
+}
+.meter[data-level="low"]  .fill{background:var(--moss)}
+.meter[data-level="med"]  .fill{background:var(--ochre)}
+.meter[data-level="high"] .fill{background:var(--rust)}
+.meter[data-level="none"] .fill{background:var(--ink-mute);width:4%}
+.meter[data-level="med"]  .val,
+.meter[data-level="high"] .val{ color:var(--ochre) }
+.meter[data-level="high"] .val{ color:var(--rust) }
+
+.compute-mode-tag{
+  display:flex;align-items:center;gap:10px;
+  font-family:var(--mono);font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-mute);
+  padding:10px 0 0;
+}
+.compute-mode-tag .dot{
+  width:7px;height:7px;border-radius:50%;background:var(--moss);
+  box-shadow:0 0 0 3px rgba(79,106,61,.2);
+  animation:pulse 3s ease-in-out infinite;
+  flex:none;
+}
+.compute-foot{
+  display:flex;align-items:center;justify-content:space-between;
+  padding-top:12px;border-top:1px dashed var(--hair);
+  font-family:var(--mono);font-size:10px;letter-spacing:.08em;
+  color:var(--ink-mute);text-transform:uppercase;
+  flex-wrap:wrap;gap:6px;
+}
+.compute-foot .ts{font-feature-settings:"tnum"}
+
+/* ------- guidance ------- */
+.guide{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0;
+  border:1px solid var(--hair);
+  border-radius:var(--r);
+  background:var(--surface);
+  overflow:hidden;
+}
+.guide > div{padding:32px}
+.guide > div + div{border-left:1px solid var(--hair)}
+.guide h3{
+  font-family:var(--display);font-weight:400;
+  font-size:28px;letter-spacing:-.005em;margin:0 0 6px;line-height:1.1;
+}
+.guide h3 small{
+  display:block;font-family:var(--mono);font-size:10px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);
+  margin-bottom:12px;font-style:normal;
+}
+.guide ul{
+  list-style:none;padding:0;margin:20px 0 0;
+  display:flex;flex-direction:column;gap:14px;
+}
+.guide li{
+  display:grid;grid-template-columns:22px 1fr;gap:10px;
+  font-size:14px;color:var(--ink-soft);line-height:1.5;
+}
+.guide li::before{
+  content:attr(data-n);
+  font-family:var(--mono);font-size:10px;letter-spacing:.06em;
+  color:var(--ink-mute);padding-top:3px;
+}
+.guide li b{color:var(--ink);font-weight:500}
+.guide .ai h3 small{color:var(--moss)}
+.guide .search h3 small{color:var(--sky)}
+
+/* ------- use cases strip ------- */
+.cases{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:0;
+  border:1px solid var(--hair);
+  border-radius:var(--r);
+  background:var(--surface);
+  overflow:hidden;
+  margin-top:32px;
+}
+.case-item{
+  padding:24px 26px;
+  border-right:1px solid var(--hair);
+}
+.case-item:last-child{ border-right:0 }
+.case-item .case-label{
+  font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-mute);
+  margin-bottom:10px;
+}
+.case-item h4{
+  font-family:var(--display);font-size:20px;font-weight:400;
+  line-height:1.1;letter-spacing:-.005em;margin:0 0 8px;
+}
+.case-item p{
+  font-size:13.5px;color:var(--ink-soft);margin:0;line-height:1.5;
+}
+
+/* ------- update settings ------- */
+.updates{
+  display:grid;
+  grid-template-columns:1fr 1.4fr;
+  gap:48px;
+  align-items:start;
+}
+.updates .intro p{
+  font-family:var(--display);font-style:italic;
+  font-size:22px;line-height:1.4;color:var(--ink-soft);
+  margin:0 0 18px;max-width:34ch;
+}
+.updates .intro .note{
+  font-family:var(--mono);font-size:11px;letter-spacing:.06em;
+  color:var(--ink-mute);text-transform:uppercase;
+  border-top:1px solid var(--hair);padding-top:14px;margin-top:18px;
+  max-width:34ch;line-height:1.6;
+}
+.update-list{
+  display:grid;grid-template-columns:1fr 1fr;gap:12px;
+}
+.update-option{
+  text-align:left;
+  background:var(--surface);
+  border:1px solid var(--hair);
+  border-radius:var(--r);
+  padding:18px 18px 16px;
+  transition:border-color var(--transition), background var(--transition), transform var(--transition);
+  position:relative;
+  display:flex;flex-direction:column;gap:6px;
+  cursor:pointer;
+}
+.update-option:hover{
+  border-color:var(--hair-strong);
+  transform:translateY(-1px);
+}
+.update-option[aria-pressed="true"]{
+  border-color:var(--ink);
+  background:#1a1812;color:var(--paper);
+  transform:none;
+}
+.update-option[aria-pressed="true"] .uo-tag,
+.update-option[aria-pressed="true"] .uo-sub{color:rgba(241,236,223,.65)}
+.uo-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.uo-tag{
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-mute);
+}
+.uo-name{font-family:var(--display);font-size:20px;line-height:1.1;letter-spacing:-.005em}
+.uo-sub{font-size:13px;color:var(--ink-soft);line-height:1.4}
+.uo-check{
+  width:14px;height:14px;border:1px solid var(--hair-strong);border-radius:50%;
+  flex:none;position:relative;transition:border-color var(--transition);
+}
+.update-option[aria-pressed="true"] .uo-check{border-color:rgba(241,236,223,.5)}
+.update-option[aria-pressed="true"] .uo-check::after{
+  content:"";position:absolute;inset:3px;border-radius:50%;background:var(--paper);
+}
+
+/* ------- steward ------- */
+.steward{
+  display:grid;
+  grid-template-columns:1.2fr 1fr;
+  gap:56px;
+  align-items:center;
+}
+.steward .copy h2{
+  font-family:var(--display);font-weight:400;
+  font-size:clamp(40px,5vw,64px);line-height:1;letter-spacing:-.015em;
+  margin:0 0 18px;
+}
+.steward .copy .kicker{
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--moss);
+  margin-bottom:14px;
+}
+.steward .copy p{
+  font-size:16px;line-height:1.6;color:var(--ink-soft);
+  max-width:48ch;margin:0 0 14px;
+}
+.steward .copy ul{
+  list-style:none;padding:0;margin:24px 0 0;
+  display:grid;grid-template-columns:1fr 1fr;gap:10px 24px;
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;
+  color:var(--ink-soft);
+}
+.steward .copy li{display:flex;gap:10px;align-items:center}
+.steward .copy li::before{
+  content:"";width:4px;height:4px;border-radius:50%;
+  background:var(--moss);flex:none
+}
+.device{
+  position:relative;
+  aspect-ratio: 4 / 3;
+  background:linear-gradient(160deg, var(--paper-2), var(--surface));
+  border:1px solid var(--hair);
+  border-radius:8px;
+  padding:24px;
+  overflow:hidden;
+}
+.device-svg{width:100%;height:100%;display:block}
+.device::after{
+  content:"STEWARD · v0.1 · local first";
+  position:absolute;left:18px;bottom:14px;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;
+  color:var(--ink-mute);text-transform:uppercase;
+}
+
+/* ------- principles strip ------- */
+.principles{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:0;
+  border:1px solid var(--hair);
+  border-radius:var(--r);
+  background:var(--surface);
+  overflow:hidden;
+  margin-top:40px;
+}
+.principle{
+  padding:24px 22px;
+  border-right:1px solid var(--hair);
+}
+.principle:last-child{ border-right:0 }
+.principle .p-num{
+  font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-mute);margin-bottom:10px;
+}
+.principle h4{
+  font-family:var(--display);font-size:18px;font-weight:400;
+  line-height:1.15;letter-spacing:-.005em;margin:0 0 8px;
+}
+.principle p{
+  font-size:13px;color:var(--ink-soft);margin:0;line-height:1.5;
+}
+
+/* ------- footer ------- */
+footer{
+  border-top:1px solid var(--hair);
+  padding:40px 0 56px;
+}
+.footer-inner{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:32px;
+  align-items:start;
+}
+.footer-brand{
+  font-family:var(--display);font-size:22px;
+  letter-spacing:-.01em;margin-bottom:10px;
+}
+.footer-desc{
+  font-family:var(--mono);font-size:11px;letter-spacing:.06em;
+  color:var(--ink-mute);text-transform:uppercase;
+  line-height:1.7;max-width:40ch;
+}
+.footer-links{
+  display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;
+}
+.footer-links a{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-mute);
+  padding:6px 12px;border:1px solid var(--hair);border-radius:999px;
+  transition:color var(--transition), border-color var(--transition);
+}
+.footer-links a:hover{ color:var(--ink); border-color:var(--hair-strong) }
+.footer-nav{
+  font-family:var(--mono);font-size:11px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-mute);
+  display:flex;flex-direction:column;gap:12px;text-align:right;
+}
+.footer-nav a{
+  transition:color var(--transition);
+}
+.footer-nav a:hover{ color:var(--ink) }
+.footer-copy{
+  margin-top:40px;
+  padding-top:20px;
+  border-top:1px solid var(--hair);
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:14px;
+  font-family:var(--mono);font-size:10px;letter-spacing:.06em;
+  color:var(--ink-mute);text-transform:uppercase;
+}
+
+/* ------- reveal animations ------- */
+.reveal{
+  opacity:0;
+  transform:translateY(14px);
+  animation:reveal .8s cubic-bezier(.2,.65,.2,1) forwards;
+}
+.reveal-1{animation-delay:.04s}
+.reveal-2{animation-delay:.16s}
+.reveal-3{animation-delay:.28s}
+.reveal-4{animation-delay:.42s}
+.reveal-5{animation-delay:.56s}
+@keyframes reveal{to{opacity:1;transform:none}}
+
+/* section fade-in via intersection observer */
+.fade-in{
+  opacity:0;transform:translateY(18px);
+  transition:opacity .7s cubic-bezier(.2,.65,.2,1), transform .7s cubic-bezier(.2,.65,.2,1);
+}
+.fade-in.visible{ opacity:1; transform:none }
+
+/* ------- responsive ------- */
+@media(max-width:1080px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .stat{border-bottom:1px solid var(--hair)}
+  .principles{grid-template-columns:repeat(2,1fr)}
+  .principle:nth-child(2){ border-right:0 }
+  .principle:nth-child(n+3){ border-top:1px solid var(--hair) }
+}
+@media(max-width:980px){
+  .hero{grid-template-columns:1fr;gap:32px;padding:56px 0 60px}
+  .hero .side{border-left:0;border-top:1px solid var(--hair);padding:24px 0 0}
+  .console{grid-template-columns:1fr}
+  .compute{position:static}
+  .modes{grid-template-columns:1fr 1fr}
+  .guide{grid-template-columns:1fr}
+  .guide > div + div{border-left:0;border-top:1px solid var(--hair)}
+  .cases{grid-template-columns:1fr}
+  .case-item{border-right:0;border-bottom:1px solid var(--hair)}
+  .case-item:last-child{border-bottom:0}
+  .updates{grid-template-columns:1fr;gap:28px}
+  .update-list{grid-template-columns:1fr 1fr}
+  .steward{grid-template-columns:1fr;gap:28px}
+  .steward .copy ul{grid-template-columns:1fr}
+  .footer-inner{grid-template-columns:1fr}
+  .footer-nav{text-align:left}
+}
+@media(max-width:640px){
+  .wrap{padding:0 20px}
+  .modes{grid-template-columns:1fr}
+  .update-list{grid-template-columns:1fr}
+  .mast nav{display:none}
+  .meter{grid-template-columns:80px 1fr auto}
+  .stats{grid-template-columns:1fr 1fr}
+  .principles{grid-template-columns:1fr}
+  .principle{ border-right:0; border-bottom:1px solid var(--hair) }
+  .principle:last-child{ border-bottom:0 }
+  .footer-links{flex-direction:column;gap:8px}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<!-- top status strip -->
+<div class="status">
+  <div class="wrap row">
+    <span><span class="dot"></span>AETHERNET · OPERATIONAL</span>
+    <span class="sep">·</span>
+    <span>NODE STEWARD‑LOCAL</span>
+    <span class="sep">·</span>
+    <span>SIGNED BUNDLE 2026.05.W3</span>
+    <div class="right">
+      <span id="ts">— · —</span>
+      <span class="sep">·</span>
+      <span>v0.1 PROTOTYPE</span>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- masthead -->
+  <header class="mast">
+    <div class="brand">
+      <span class="glyph" aria-hidden="true"></span>
+      <span>Aethernet</span>
+    </div>
+    <nav aria-label="Primary navigation">
+      <a href="#console">Console</a>
+      <a href="#guidance">Guidance</a>
+      <a href="#updates">Updates</a>
+      <a href="#steward">Steward</a>
+    </nav>
+    <a href="about.html" class="nav-cta">About →</a>
+  </header>
+
+  <!-- hero -->
+  <section class="hero" style="border-top:0;padding-top:68px" aria-labelledby="hero-heading">
+    <div>
+      <div class="meta reveal reveal-1" style="margin-bottom:20px">§ 00 — Manifesto</div>
+      <h1 class="reveal reveal-2" id="hero-heading">AI for the <em>rest</em> of us.</h1>
+      <p class="lede reveal reveal-3">
+        A privacy‑first, low‑energy AI system that helps you decide when to use AI —
+        and just as often, when to reach for something simpler.
+      </p>
+      <div class="meta reveal reveal-4">Not more AI everywhere · Better AI, used deliberately</div>
+      <div class="actions reveal reveal-5">
+        <a href="#console" class="btn-primary">Try the console</a>
+        <a href="product.html" class="btn-ghost">Meet Steward</a>
+      </div>
+    </div>
+    <aside class="side reveal reveal-4" aria-label="Our position">
+      <div class="label">Our position</div>
+      <div class="position-item" data-n="01">
+        Most AI optimizes for <b>more usage</b>. Aethernet optimizes for <b>appropriate usage</b>.
+      </div>
+      <div class="position-item" data-n="02">
+        Most AI hides its resource cost. <b>Aethernet shows it.</b>
+      </div>
+      <div class="position-item" data-n="03">
+        Most AI pushes cloud dependence. Aethernet <b>prefers local</b>.
+      </div>
+      <div class="position-item" data-n="04">
+        Most AI pretends to be the best answer. Aethernet tells you <b>when it isn't</b>.
+      </div>
+    </aside>
+  </section>
+
+  <!-- stats -->
+  <div class="stats fade-in" aria-label="Key figures">
+    <div class="stat">
+      <div class="num"><em>4</em></div>
+      <div class="desc">routing modes — local, cloud, search, offline</div>
+    </div>
+    <div class="stat">
+      <div class="num"><em>0</em></div>
+      <div class="desc">surveillance. steward is not a data‑collection device</div>
+    </div>
+    <div class="stat">
+      <div class="num"><em>∞</em></div>
+      <div class="desc">privacy. personal data stays local by default</div>
+    </div>
+    <div class="stat">
+      <div class="num"><em>1</em></div>
+      <div class="desc">rule. AI only when AI is actually the right answer</div>
+    </div>
+  </div>
+
+  <!-- console -->
+  <section id="console" aria-labelledby="console-heading">
+    <div class="section-head">
+      <div>
+        <div class="num">§ 01 — Console</div>
+        <h2 id="console-heading" style="margin-top:6px">Ask, but only when asking is worth it.</h2>
+      </div>
+      <div class="aside">Each request is routed locally, to search, or to cloud — never silently.</div>
+    </div>
+
+    <div class="console">
+      <!-- left: input + modes -->
+      <div>
+        <div class="input-card">
+          <div class="input-head">
+            <span>Aethernet · Input</span>
+            <span class="live"><span class="d" aria-hidden="true"></span>LISTENING — LOCAL</span>
+          </div>
+          <textarea id="q" class="q-input" rows="4" placeholder="What do you actually need to know?" aria-label="Your question"></textarea>
+          <div class="input-foot">
+            <div class="recommend" id="rec" aria-live="polite">
+              <span class="badge" id="recBadge">Ready</span>
+              <span class="text" id="recText">Type a question. Aethernet will suggest where it should be answered.</span>
+            </div>
+            <button class="submit" id="submit" aria-label="Route request">Route →</button>
+          </div>
+        </div>
+
+        <div class="modes" role="radiogroup" aria-label="Routing mode">
+          <button class="mode" role="radio" aria-pressed="true" data-mode="local">
+            <div class="mode-label"><span>01 · Default</span><span class="mode-dot" aria-hidden="true"></span></div>
+            <div class="mode-name">Local AI</div>
+            <div class="mode-sub">Private, offline‑capable, lower energy. Lives on your Steward.</div>
+          </button>
+          <button class="mode" role="radio" aria-pressed="false" data-mode="cloud">
+            <div class="mode-label"><span>02 · On request</span><span class="mode-dot" aria-hidden="true"></span></div>
+            <div class="mode-name">Cloud AI</div>
+            <div class="mode-sub">For deeper reasoning. Visible, justified, never default.</div>
+          </button>
+          <button class="mode" role="radio" aria-pressed="false" data-mode="search">
+            <div class="mode-label"><span>03 · Often better</span><span class="mode-dot" aria-hidden="true"></span></div>
+            <div class="mode-name">Search</div>
+            <div class="mode-sub">For facts, news, and pages a model shouldn't be guessing about.</div>
+          </button>
+          <button class="mode" role="radio" aria-pressed="false" data-mode="offline">
+            <div class="mode-label"><span>04 · Resilient</span><span class="mode-dot" aria-hidden="true"></span></div>
+            <div class="mode-name">Offline</div>
+            <div class="mode-sub">Signed knowledge packs. No cloud, no transit, no surprise.</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- right: compute panel -->
+      <div class="compute" id="compute" aria-label="Responsible compute estimates">
+        <div class="compute-head">
+          <h3>Responsible compute</h3>
+          <div class="scope">Per‑request estimate</div>
+        </div>
+
+        <div class="compute-mode-tag">
+          <span class="dot" aria-hidden="true"></span>
+          <span id="computeModeName">Local mode · private</span>
+        </div>
+
+        <div class="meter" data-level="low" data-key="privacy">
+          <div class="name">Privacy</div>
+          <div class="bar"><div class="fill"></div></div>
+          <div class="val">Private</div>
+        </div>
+        <div class="meter" data-level="low" data-key="energy">
+          <div class="name">Energy</div>
+          <div class="bar"><div class="fill"></div></div>
+          <div class="val">Low</div>
+        </div>
+        <div class="meter" data-level="low" data-key="water">
+          <div class="name">Water</div>
+          <div class="bar"><div class="fill"></div></div>
+          <div class="val">Low</div>
+        </div>
+        <div class="meter" data-level="low" data-key="carbon">
+          <div class="name">Carbon</div>
+          <div class="bar"><div class="fill"></div></div>
+          <div class="val">≈ 0.4 g CO₂e</div>
+        </div>
+
+        <div class="compute-foot">
+          <span>Estimates · informed use, not guilt</span>
+          <span class="ts" id="compute-ts">—</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- guidance -->
+  <section id="guidance" aria-labelledby="guidance-heading">
+    <div class="section-head">
+      <div>
+        <div class="num">§ 02 — Guidance</div>
+        <h2 id="guidance-heading" style="margin-top:6px">When AI helps · when a simpler tool wins.</h2>
+      </div>
+      <div class="aside">An honest model knows what it isn't for.</div>
+    </div>
+
+    <div class="guide fade-in">
+      <div class="ai">
+        <h3>
+          <small>Use AI when</small>
+          The task is shape, not fact.
+        </h3>
+        <ul>
+          <li data-n="01"><span><b>Drafting & summarizing.</b> Long emails, meeting notes, a first pass at a letter or a plan.</span></li>
+          <li data-n="02"><span><b>Translating shape.</b> Turning bullet points into prose, prose into a checklist, one tone into another.</span></li>
+          <li data-n="03"><span><b>Thinking through a decision.</b> Listing trade‑offs, pressure‑testing a plan, naming what's missing.</span></li>
+          <li data-n="04"><span><b>Reorganizing what you already have.</b> Your notes, your files, your archive — restructured, not invented.</span></li>
+        </ul>
+      </div>
+      <div class="search">
+        <h3>
+          <small>Use search instead when</small>
+          The task is fact, not shape.
+        </h3>
+        <ul>
+          <li data-n="01"><span><b>Today's anything.</b> Prices, weather, news, scores, opening hours. Models guess; pages know.</span></li>
+          <li data-n="02"><span><b>Public records & primary sources.</b> Laws, datasets, official forms. Go to the source, not its echo.</span></li>
+          <li data-n="03"><span><b>Specific people, places, and products.</b> Where the name and the number have to be exactly right.</span></li>
+          <li data-n="04"><span><b>Anything you'd want to cite.</b> If the link matters, the link is the answer.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- use cases -->
+    <div class="section-head fade-in" style="margin-top:56px">
+      <div>
+        <div class="num">§ 02b — Who it's for</div>
+        <h2 style="margin-top:6px">Built for real life, not enterprise scale.</h2>
+      </div>
+      <div class="aside">Six communities that deserve better AI.</div>
+    </div>
+    <div class="cases fade-in">
+      <div class="case-item">
+        <div class="case-label">01 · Households</div>
+        <h4>Families</h4>
+        <p>Private planning, homework, documents, safe search guidance. Your home, your data.</p>
+      </div>
+      <div class="case-item">
+        <div class="case-label">02 · Commerce</div>
+        <h4>Small businesses</h4>
+        <p>Operations, writing, customer service, research — at a cost that makes sense.</p>
+      </div>
+      <div class="case-item">
+        <div class="case-label">03 · Creative</div>
+        <h4>Artists & studios</h4>
+        <p>Private archive, image cataloging, writing support, project planning.</p>
+      </div>
+      <div class="case-item">
+        <div class="case-label">04 · Education</div>
+        <h4>Schools & libraries</h4>
+        <p>Transparent AI with offline packs, education bundles, and reduced cloud exposure.</p>
+      </div>
+      <div class="case-item">
+        <div class="case-label">05 · Connectivity</div>
+        <h4>Rural communities</h4>
+        <p>AI that works with intermittent connectivity and slow, signed update cycles.</p>
+      </div>
+      <div class="case-item">
+        <div class="case-label">06 · Resilience</div>
+        <h4>Emergency use</h4>
+        <p>Offline knowledge packs, local maps, public safety, medical basics, civic updates.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- updates -->
+  <section id="updates" aria-labelledby="updates-heading">
+    <div class="section-head">
+      <div>
+        <div class="num">§ 03 — Update cadence</div>
+        <h2 id="updates-heading" style="margin-top:6px">Slow updates by default.</h2>
+      </div>
+      <div class="aside">Bandwidth is a resource. So is your attention.</div>
+    </div>
+
+    <div class="updates fade-in">
+      <div class="intro">
+        <p>Most users don't need a smarter model every week. Choose a rhythm that fits your bandwidth, your hardware, and your nerves.</p>
+        <div class="note">Updates are signed bundles. Verify before you install. No silent changes, ever.</div>
+      </div>
+      <div class="update-list" role="radiogroup" aria-label="Update cadence">
+        <button class="update-option" role="radio" aria-pressed="false" data-update="fast">
+          <div class="uo-head"><div class="uo-tag">A · Fast</div><div class="uo-check" aria-hidden="true"></div></div>
+          <div class="uo-name">Continuous</div>
+          <div class="uo-sub">Latest model and knowledge as soon as a signed bundle ships.</div>
+        </button>
+        <button class="update-option" role="radio" aria-pressed="true" data-update="weekly">
+          <div class="uo-head"><div class="uo-tag">B · Recommended</div><div class="uo-check" aria-hidden="true"></div></div>
+          <div class="uo-name">Weekly bundle</div>
+          <div class="uo-sub">One quiet update each week. Most people pick this.</div>
+        </button>
+        <button class="update-option" role="radio" aria-pressed="false" data-update="monthly">
+          <div class="uo-head"><div class="uo-tag">C · Monthly</div><div class="uo-check" aria-hidden="true"></div></div>
+          <div class="uo-name">Monthly bundle</div>
+          <div class="uo-sub">For low‑bandwidth or low‑churn environments.</div>
+        </button>
+        <button class="update-option" role="radio" aria-pressed="false" data-update="manual">
+          <div class="uo-head"><div class="uo-tag">D · Manual</div><div class="uo-check" aria-hidden="true"></div></div>
+          <div class="uo-name">Manual / offline</div>
+          <div class="uo-sub">You decide. Sideload signed bundles from USB or the network.</div>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- steward -->
+  <section id="steward" aria-labelledby="steward-heading">
+    <div class="section-head">
+      <div>
+        <div class="num">§ 04 — Device</div>
+        <h2 id="steward-heading" style="margin-top:6px">Steward.</h2>
+      </div>
+      <div class="aside">The local intelligence layer. Not a surveillance assistant.</div>
+    </div>
+
+    <div class="steward fade-in">
+      <div class="copy">
+        <div class="kicker">A trusted local appliance</div>
+        <h2 style="font-size:clamp(36px,4.6vw,58px);margin-bottom:18px">A quieter machine in the corner of the room.</h2>
+        <p>Steward holds your model, your archive, and your update bundles locally. It connects to the cloud only when it announces it's about to — and only for what you asked.</p>
+        <p>Designed for households, studios, classrooms, clinics, and small operations who want intelligence without surrendering their data, their bandwidth, or their evenings.</p>
+        <ul aria-label="Steward features">
+          <li>Local‑first inference</li>
+          <li>Signed update bundles</li>
+          <li>Offline knowledge packs</li>
+          <li>Visible cloud handoff</li>
+          <li>Low‑power idle</li>
+          <li>Open audit log</li>
+        </ul>
+      </div>
+      <div class="device" aria-label="Steward device illustration">
+        <svg class="device-svg" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+          <defs>
+            <linearGradient id="case" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#22201A"/>
+              <stop offset="1" stop-color="#0D0C09"/>
+            </linearGradient>
+            <linearGradient id="grill" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#3A3730" stop-opacity=".0"/>
+              <stop offset=".5" stop-color="#3A3730" stop-opacity=".5"/>
+              <stop offset="1" stop-color="#3A3730" stop-opacity=".0"/>
+            </linearGradient>
+          </defs>
+          <!-- shadow -->
+          <ellipse cx="200" cy="272" rx="148" ry="7" fill="#000" opacity=".15"/>
+          <!-- chassis -->
+          <rect x="58" y="78" width="284" height="172" rx="10" fill="url(#case)"/>
+          <!-- top plate highlight -->
+          <rect x="58" y="78" width="284" height="13" rx="10" fill="#2E2B23" opacity=".9"/>
+          <!-- speaker grill -->
+          <g transform="translate(78,108)">
+            <rect width="138" height="122" rx="4" fill="#15140F"/>
+            <g fill="#3A3730" opacity=".65">
+              <g id="dots"></g>
+            </g>
+            <rect width="138" height="122" rx="4" fill="url(#grill)" opacity=".3"/>
+          </g>
+          <!-- screen panel -->
+          <g transform="translate(234,108)">
+            <rect width="88" height="54" rx="3" fill="#0A0907"/>
+            <!-- moss status bar -->
+            <rect x="6" y="7" width="38" height="3.5" rx="1.5" fill="#4F6A3D"/>
+            <!-- text lines -->
+            <rect x="6" y="16" width="62" height="2" rx="1" fill="#7A7363" opacity=".5"/>
+            <rect x="6" y="22" width="50" height="2" rx="1" fill="#7A7363" opacity=".5"/>
+            <rect x="6" y="28" width="58" height="2" rx="1" fill="#7A7363" opacity=".5"/>
+            <rect x="6" y="34" width="42" height="2" rx="1" fill="#7A7363" opacity=".5"/>
+            <!-- status dot -->
+            <circle cx="77" cy="44" r="2.5" fill="#4F6A3D"/>
+            <circle cx="77" cy="44" r="5.5" fill="none" stroke="#4F6A3D" stroke-opacity=".3"/>
+          </g>
+          <!-- secondary readout -->
+          <g transform="translate(234,176)">
+            <rect width="88" height="36" rx="3" fill="#0A0907"/>
+            <rect x="6" y="8" width="24" height="2" rx="1" fill="#7A7363" opacity=".4"/>
+            <rect x="6" y="14" width="50" height="2" rx="1" fill="#7A7363" opacity=".4"/>
+            <rect x="6" y="20" width="36" height="2" rx="1" fill="#7A7363" opacity=".4"/>
+            <rect x="6" y="26" width="18" height="2" rx="1" fill="#4F6A3D" opacity=".7"/>
+          </g>
+          <!-- dial -->
+          <g transform="translate(338,178)">
+            <circle r="20" fill="#15140F"/>
+            <circle r="20" fill="none" stroke="#3A3730"/>
+            <circle r="2.5" fill="#4F6A3D"/>
+            <line x1="0" y1="0" x2="0" y2="-14" stroke="#4F6A3D" stroke-width="1.5" stroke-linecap="round"/>
+          </g>
+          <!-- vent slots -->
+          <g fill="#0D0C09" opacity=".8">
+            <rect x="78" y="238" width="8" height="2" rx="1"/>
+            <rect x="92" y="238" width="8" height="2" rx="1"/>
+            <rect x="106" y="238" width="8" height="2" rx="1"/>
+            <rect x="120" y="238" width="8" height="2" rx="1"/>
+          </g>
+          <!-- foot -->
+          <rect x="98" y="248" width="204" height="5" rx="2" fill="#0A0907"/>
+          <!-- engraved label -->
+          <text x="78" y="246" fill="#4A463A" font-family="IBM Plex Mono, monospace" font-size="8.5" letter-spacing="2.5">STEWARD</text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- core principles -->
+    <div class="section-head fade-in" style="margin-top:64px">
+      <div>
+        <div class="num">§ 04b — Principles</div>
+        <h2 style="margin-top:6px">What makes this different.</h2>
+      </div>
+      <div class="aside">Every design decision follows from these four things.</div>
+    </div>
+    <div class="principles fade-in">
+      <div class="principle">
+        <div class="p-num">01</div>
+        <h4>Privacy first</h4>
+        <p>Personal data stays local whenever possible. Cloud use is optional, visible, and justified.</p>
+      </div>
+      <div class="principle">
+        <div class="p-num">02</div>
+        <h4>Low‑energy by default</h4>
+        <p>The system prefers lightweight local answers unless the user needs deeper reasoning.</p>
+      </div>
+      <div class="principle">
+        <div class="p-num">03</div>
+        <h4>Transparent compute</h4>
+        <p>The interface shows whether a request used local AI, cloud AI, search, or high‑compute reasoning.</p>
+      </div>
+      <div class="principle">
+        <div class="p-num">04</div>
+        <h4>Search when search is better</h4>
+        <p>Aethernet tells you when Google, a website, or a direct database is more appropriate than AI.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- footer -->
+  <footer>
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand">Aethernet</div>
+        <div class="footer-desc">
+          Responsible AI infrastructure for ordinary people,<br>
+          small businesses, schools, studios, families, and communities.
+        </div>
+        <div class="footer-links">
+          <a href="about.html">About</a>
+          <a href="product.html">Steward</a>
+          <a href="manifesto.md">Manifesto</a>
+          <a href="roadmap.md">Roadmap</a>
+        </div>
+      </div>
+      <nav class="footer-nav" aria-label="Footer navigation">
+        <a href="#console">Console</a>
+        <a href="#guidance">Guidance</a>
+        <a href="#updates">Updates</a>
+        <a href="#steward">Steward</a>
+      </nav>
+    </div>
+    <div class="footer-copy">
+      <span>Aethernet · Privacy‑first · Low‑energy · Transparent</span>
+      <span>v0.1 · prototype · placeholder data</span>
+    </div>
+  </footer>
+
+</div><!-- /wrap -->
+
+<script>
+/* ------- scroll progress bar ------- */
+const progressBar = document.getElementById('progress');
+window.addEventListener('scroll', ()=>{
+  const h = document.documentElement;
+  const pct = h.scrollTop / (h.scrollHeight - h.clientHeight);
+  progressBar.style.transform = `scaleX(${pct})`;
+}, {passive:true});
+
+/* ------- compute presets per mode ------- */
+const presets = {
+  local:   {
+    tag:'Local mode · private',
+    privacy:["low","Private"],        energy:["low","Low"],    water:["low","Low"],     carbon:["low","≈ 0.4 g CO₂e"]
+  },
+  cloud:   {
+    tag:'Cloud mode · shared',
+    privacy:["med","Shared w/ cloud"],energy:["med","Medium"], water:["med","Medium"],  carbon:["med","≈ 3.1 g CO₂e"]
+  },
+  search:  {
+    tag:'Search mode · web‑connected',
+    privacy:["med","Web‑connected"],  energy:["low","Low"],    water:["low","Low"],     carbon:["low","≈ 0.2 g CO₂e"]
+  },
+  offline: {
+    tag:'Offline mode · sealed',
+    privacy:["low","Private · sealed"],energy:["none","Idle"], water:["none","None"],   carbon:["none","≈ 0.0 g CO₂e"]
+  },
+  deep:    {
+    tag:'Deep reasoning · cloud',
+    privacy:["high","Shared · deep"], energy:["high","High"],  water:["high","High"],   carbon:["high","≈ 11 g CO₂e"]
+  }
+};
+const widthByLevel = { none:4, low:22, med:54, high:88 };
+
+function setCompute(mode){
+  const p = presets[mode] || presets.local;
+  document.getElementById('computeModeName').textContent = p.tag;
+  document.querySelectorAll('.meter').forEach(m=>{
+    const k = m.dataset.key;
+    const [lvl, label] = p[k];
+    m.setAttribute('data-level', lvl);
+    m.querySelector('.val').textContent = label;
+    m.querySelector('.fill').style.width = widthByLevel[lvl] + '%';
+  });
+  document.getElementById('compute-ts').textContent = stamp();
+}
+
+/* ------- mode selection ------- */
+const modeBtns = document.querySelectorAll('.mode');
+modeBtns.forEach(b=>{
+  b.addEventListener('click', ()=>{
+    modeBtns.forEach(x=>x.setAttribute('aria-pressed','false'));
+    b.setAttribute('aria-pressed','true');
+    setCompute(b.dataset.mode);
+  });
+});
+
+/* ------- update selection ------- */
+document.querySelectorAll('.update-option').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('.update-option').forEach(x=>x.setAttribute('aria-pressed','false'));
+    b.setAttribute('aria-pressed','true');
+  });
+});
+
+/* ------- textarea auto-resize ------- */
+const q = document.getElementById('q');
+q.addEventListener('input', ()=>{
+  q.style.height = 'auto';
+  q.style.height = Math.max(110, q.scrollHeight) + 'px';
+});
+
+/* ------- live recommendation ------- */
+const recBadge = document.getElementById('recBadge');
+const recText  = document.getElementById('recText');
+
+function classify(text){
+  const t = (text || '').toLowerCase().trim();
+  if (!t) return { cls:'', label:'Ready', text:'Type a question. Aethernet will suggest where it should be answered.' };
+
+  if (/\b(today|tonight|tomorrow|right now|currently|weather|forecast|news|headlines|score|stock|price|exchange rate|open(ing)? hours|when does|when is|address of|directions|near me|menu|showtimes)\b/.test(t) || /\$[\d,]+/.test(t))
+    return { cls:'s', label:'Use search', text:'A web page will be more accurate than a model right now.' };
+
+  if (/^[\d\s.,+\-*/x×÷=()%]+$/.test(t) || /\b(convert|in (km|miles|kg|lbs|°c|°f|usd|eur|gbp)|how many .* in)\b/.test(t))
+    return { cls:'', label:'Local is enough', text:'This is a calculator‑grade question. Local answer recommended.' };
+
+  if (/\b(strategy|business plan|analyze deeply|long[- ]?term|compare options|trade[- ]?offs?|root cause|architect|design system|legal analysis|tax strategy|financial model|risk assessment|investment|acquisition)\b/.test(t))
+    return { cls:'r', label:'Deep reasoning', text:'Higher‑compute mode recommended. Cloud handoff will be visible.' };
+
+  if (/\b(write|draft|rewrite|summari[sz]e|outline|explain|brainstorm|name (ideas|suggestions)|translate|polish|edit|tone|email|letter|plan|recipe|story|poem|caption|help me|how do i)\b/.test(t))
+    return { cls:'', label:'AI is useful', text:'Shape work — local AI should handle this well.' };
+
+  if (/\b(who is|what is the|where is|wikipedia|biography|company|founded|ceo of|population of|capital of|definition of)\b/.test(t))
+    return { cls:'s', label:'Use search', text:'Names and numbers — go to the source.' };
+
+  return { cls:'o', label:'Worth a try', text:'Aethernet will start local and only escalate if needed.' };
+}
+
+function updateRec(){
+  const r = classify(q.value);
+  recBadge.className = 'badge ' + r.cls;
+  recBadge.textContent = r.label;
+  recText.textContent  = r.text;
+}
+q.addEventListener('input', updateRec);
+
+/* ------- submit ------- */
+document.getElementById('submit').addEventListener('click', ()=>{
+  if (!q.value.trim()){ q.focus(); return; }
+  const orig = recBadge.textContent;
+  recBadge.textContent = 'Routing…';
+  recBadge.className = 'badge';
+  setTimeout(updateRec, 780);
+});
+
+/* ------- timestamp ------- */
+function stamp(){
+  const d = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} · ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+function tick(){
+  document.getElementById('ts').textContent = stamp();
+}
+tick(); setInterval(tick, 1000);
+setCompute('local');
+
+/* ------- generate speaker grill dots ------- */
+(function(){
+  const dots = document.getElementById('dots');
+  if (!dots) return;
+  const cols=18, rows=15, sx=7.5, sy=8, ox=4, oy=5;
+  let svg='';
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const x=ox+c*sx, y=oy+r*sy;
+      svg+=`<circle cx="${x}" cy="${y}" r="1.1"/>`;
+    }
+  }
+  dots.innerHTML = svg;
+})();
+
+/* ------- scroll-spy nav ------- */
+const navLinks = document.querySelectorAll('.mast nav a[href^="#"]');
+const sections = [...navLinks].map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+
+const spy = new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      const id = entry.target.id;
+      navLinks.forEach(a=>{
+        a.classList.toggle('active', a.getAttribute('href') === '#' + id);
+      });
+    }
+  });
+}, { rootMargin:'-30% 0px -60% 0px' });
+sections.forEach(s => spy.observe(s));
+
+/* ------- fade-in on scroll ------- */
+const fader = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){ e.target.classList.add('visible'); fader.unobserve(e.target); }
+  });
+}, { rootMargin:'0px 0px -80px 0px' });
+document.querySelectorAll('.fade-in').forEach(el => fader.observe(el));
+</script>
+</body>
+</html>

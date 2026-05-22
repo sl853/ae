@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Steward — The local AI appliance by Aethernet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F1ECDF;--paper-2:#E9E2D0;--surface:#F7F3E8;
+  --ink:#15140F;--ink-soft:#4A463C;--ink-mute:#807866;
+  --hair:rgba(21,20,15,.14);--hair-strong:rgba(21,20,15,.32);
+  --moss:#4F6A3D;--moss-soft:#DCE2C9;
+  --ochre:#A8772B;--ochre-soft:#EDDFBE;
+  --rust:#9A3F22;--rust-soft:#ECC9B6;
+  --sky:#3A5E73;--sky-soft:#C9D8DE;
+  --display:"Instrument Serif","Times New Roman",serif;
+  --sans:"IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+  --r:4px;--transition:200ms cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+html{scroll-behavior:smooth}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+a{color:inherit;text-decoration:none}
+body{
+  background:var(--paper);color:var(--ink);
+  font-family:var(--sans);font-weight:400;font-size:15px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:
+    radial-gradient(circle at 18% 22%,rgba(168,119,43,.06),transparent 45%),
+    radial-gradient(circle at 82% 78%,rgba(79,106,61,.05),transparent 50%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.08  0 0 0 0 0.08  0 0 0 0 0.06  0 0 0 0.32 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.55'/></svg>");
+  mix-blend-mode:multiply;opacity:.45;
+}
+#progress{position:fixed;top:0;left:0;right:0;height:2px;background:var(--moss);transform-origin:left;transform:scaleX(0);z-index:100;opacity:.7;transition:transform .1s linear}
+.wrap{position:relative;z-index:2;max-width:1240px;margin:0 auto;padding:0 32px}
+
+/* status */
+.status{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--ink-soft);border-bottom:1px solid var(--hair);background:rgba(241,236,223,.85);backdrop-filter:saturate(120%) blur(8px);position:sticky;top:0;z-index:50}
+.status .row{display:flex;align-items:center;gap:18px;padding:9px 0;flex-wrap:wrap}
+.status .sep{opacity:.4}
+.status .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--moss);margin-right:7px;vertical-align:middle;box-shadow:0 0 0 3px rgba(79,106,61,.18);animation:pulse 3.2s ease-in-out infinite}
+.status .right{margin-left:auto;display:flex;gap:18px;flex-wrap:wrap}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(79,106,61,.18)}50%{box-shadow:0 0 0 6px rgba(79,106,61,.05)}}
+
+/* mast */
+.mast{display:flex;align-items:center;justify-content:space-between;padding:24px 0;border-bottom:1px solid var(--hair)}
+.mast .brand{font-family:var(--display);font-size:32px;line-height:1;letter-spacing:-.01em;display:flex;align-items:center;gap:14px}
+.mast .brand .glyph{width:28px;height:28px;border:1px solid var(--ink);border-radius:50%;position:relative;flex:none}
+.mast .brand .glyph::before,.mast .brand .glyph::after{content:"";position:absolute;background:var(--ink)}
+.mast .brand .glyph::before{left:50%;top:4px;bottom:4px;width:1px;transform:translateX(-.5px)}
+.mast .brand .glyph::after{top:50%;left:4px;right:4px;height:1px;transform:translateY(-.5px)}
+.mast nav{display:flex;gap:26px;font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+.mast nav a{padding-bottom:2px;border-bottom:1px solid transparent;transition:border-color var(--transition),color var(--transition)}
+.mast nav a:hover{color:var(--ink);border-color:var(--ink-mute)}
+.mast nav a.current{color:var(--ink);border-color:var(--ink)}
+.mast .nav-cta{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:8px 14px;border:1px solid var(--ink);border-radius:999px;color:var(--ink);transition:background var(--transition),color var(--transition)}
+.mast .nav-cta:hover{background:var(--ink);color:var(--paper)}
+
+/* hero */
+.hero{padding:80px 0 90px;border-bottom:1px solid var(--hair)}
+.hero .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--moss);margin-bottom:20px}
+.hero h1{font-family:var(--display);font-weight:400;font-size:clamp(64px,8vw,118px);line-height:.92;letter-spacing:-.025em;margin:0 0 30px}
+.hero h1 em{font-style:italic;color:var(--moss)}
+.hero .sub{display:grid;grid-template-columns:1.4fr 1fr;gap:56px;align-items:start}
+.hero .lede{font-family:var(--display);font-style:italic;font-size:22px;line-height:1.42;color:var(--ink-soft);max-width:52ch;margin:0 0 28px}
+.hero .meta{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute)}
+.hero .actions{display:flex;gap:14px;margin-top:28px;flex-wrap:wrap}
+.btn-primary{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:11px 20px;border:1px solid var(--ink);border-radius:999px;background:var(--ink);color:var(--paper);transition:background var(--transition),border-color var(--transition)}
+.btn-primary:hover{background:var(--ink-soft);border-color:var(--ink-soft)}
+.btn-ghost{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:11px 20px;border:1px solid var(--hair-strong);border-radius:999px;color:var(--ink-soft);transition:border-color var(--transition),color var(--transition)}
+.btn-ghost:hover{border-color:var(--ink);color:var(--ink)}
+.hero .device-wrap{border:1px solid var(--hair);border-radius:8px;background:linear-gradient(160deg,var(--paper-2),var(--surface));padding:32px;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.hero .device-wrap::after{content:"STEWARD · v0.1 · local first";position:absolute;left:16px;bottom:12px;font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--ink-mute);text-transform:uppercase}
+
+/* sections */
+section{padding:72px 0}
+section+section{border-top:1px solid var(--hair)}
+.section-head{display:flex;align-items:baseline;justify-content:space-between;gap:24px;margin-bottom:40px;border-bottom:1px solid var(--hair);padding-bottom:20px}
+.section-head .num{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--ink-mute);text-transform:uppercase}
+.section-head h2{font-family:var(--display);font-weight:400;font-size:clamp(32px,3.6vw,46px);letter-spacing:-.01em;margin:0;line-height:1.1}
+.section-head .aside{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-mute);max-width:260px;text-align:right;line-height:1.6}
+
+/* feature grid */
+.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--hair);border-radius:var(--r);background:var(--surface);overflow:hidden}
+.feature{padding:28px 26px;border-right:1px solid var(--hair);border-bottom:1px solid var(--hair)}
+.feature:nth-child(3n){border-right:0}
+.feature:nth-last-child(-n+3){border-bottom:0}
+.feature .f-num{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:12px}
+.feature h3{font-family:var(--display);font-size:22px;font-weight:400;line-height:1.1;letter-spacing:-.005em;margin:0 0 10px}
+.feature p{font-size:13.5px;color:var(--ink-soft);margin:0;line-height:1.55}
+.feature .f-badge{display:inline-flex;align-items:center;gap:6px;margin-top:14px;padding:4px 10px;border-radius:999px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.feature .f-badge.low{background:var(--moss-soft);color:var(--moss);border:1px solid rgba(79,106,61,.3)}
+.feature .f-badge.med{background:var(--ochre-soft);color:var(--ochre);border:1px solid rgba(168,119,43,.3)}
+.feature .f-badge.sky{background:var(--sky-soft);color:var(--sky);border:1px solid rgba(58,94,115,.3)}
+
+/* spec table */
+.spec-table{width:100%;border-collapse:collapse;font-size:14px}
+.spec-table tr{border-bottom:1px solid var(--hair)}
+.spec-table tr:last-child{border-bottom:0}
+.spec-table td{padding:16px 20px;vertical-align:top}
+.spec-table td:first-child{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute);width:220px;padding-left:0}
+.spec-table td:last-child{color:var(--ink-soft);padding-right:0}
+.spec-table td b{color:var(--ink);font-weight:500}
+.spec-wrap{background:var(--surface);border:1px solid var(--hair);border-radius:var(--r);padding:10px 24px}
+
+/* how it works */
+.how-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--hair);border-radius:var(--r);background:var(--surface);overflow:hidden}
+.how-step{padding:28px 24px;border-right:1px solid var(--hair);position:relative}
+.how-step:last-child{border-right:0}
+.how-step .step-n{font-family:var(--display);font-size:48px;line-height:1;letter-spacing:-.02em;color:var(--hair-strong);margin-bottom:16px}
+.how-step h4{font-family:var(--display);font-size:20px;font-weight:400;line-height:1.1;margin:0 0 10px}
+.how-step p{font-size:13.5px;color:var(--ink-soft);margin:0;line-height:1.5}
+
+/* comparison */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.compare-col{background:var(--surface);border:1px solid var(--hair);border-radius:var(--r);overflow:hidden}
+.compare-col.steward{border-color:var(--ink)}
+.compare-head{padding:18px 22px;border-bottom:1px solid var(--hair);display:flex;align-items:center;justify-content:space-between}
+.compare-head h3{font-family:var(--display);font-size:22px;font-weight:400;letter-spacing:-.005em;margin:0}
+.compare-head .ch-tag{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute)}
+.compare-col.steward .compare-head{background:#1a1812;color:var(--paper)}
+.compare-col.steward .compare-head .ch-tag{color:rgba(241,236,223,.5)}
+.compare-body{padding:8px 22px 20px}
+.compare-row{display:grid;grid-template-columns:auto 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--hair);font-size:14px;align-items:center}
+.compare-row:last-child{border-bottom:0}
+.compare-row .cr-icon{font-family:var(--mono);font-size:14px;width:20px;flex:none}
+.compare-row .cr-text{color:var(--ink-soft);line-height:1.45}
+.compare-row .cr-text b{color:var(--ink);font-weight:500}
+.cr-yes{color:var(--moss)}
+.cr-no{color:var(--rust);opacity:.7}
+
+/* fade-in */
+.fade-in{opacity:0;transform:translateY(18px);transition:opacity .7s cubic-bezier(.2,.65,.2,1),transform .7s cubic-bezier(.2,.65,.2,1)}
+.fade-in.visible{opacity:1;transform:none}
+.reveal{opacity:0;transform:translateY(14px);animation:reveal .8s cubic-bezier(.2,.65,.2,1) forwards}
+.reveal-1{animation-delay:.04s}.reveal-2{animation-delay:.16s}.reveal-3{animation-delay:.28s}.reveal-4{animation-delay:.42s}
+@keyframes reveal{to{opacity:1;transform:none}}
+
+/* footer */
+footer{border-top:1px solid var(--hair);padding:40px 0 56px}
+.footer-inner{display:grid;grid-template-columns:1fr auto;gap:32px;align-items:start}
+.footer-brand{font-family:var(--display);font-size:22px;letter-spacing:-.01em;margin-bottom:10px}
+.footer-desc{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ink-mute);text-transform:uppercase;line-height:1.7;max-width:40ch}
+.footer-links{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.footer-links a{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute);padding:6px 12px;border:1px solid var(--hair);border-radius:999px;transition:color var(--transition),border-color var(--transition)}
+.footer-links a:hover{color:var(--ink);border-color:var(--hair-strong)}
+.footer-nav{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-mute);display:flex;flex-direction:column;gap:12px;text-align:right}
+.footer-nav a:hover{color:var(--ink)}
+.footer-copy{margin-top:40px;padding-top:20px;border-top:1px solid var(--hair);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--ink-mute);text-transform:uppercase}
+
+@media(max-width:980px){
+  .hero .sub{grid-template-columns:1fr;gap:32px}
+  .feature-grid{grid-template-columns:1fr 1fr}
+  .feature:nth-child(2n){border-right:0}
+  .feature:nth-child(3n){border-right:1px solid var(--hair)}
+  .feature:nth-child(2n){border-right:0}
+  .how-steps{grid-template-columns:1fr 1fr}
+  .how-step:nth-child(2){border-right:0}
+  .how-step:nth-child(n+3){border-top:1px solid var(--hair)}
+  .compare{grid-template-columns:1fr}
+  .footer-inner{grid-template-columns:1fr}
+  .footer-nav{text-align:left}
+}
+@media(max-width:640px){
+  .wrap{padding:0 20px}
+  .feature-grid{grid-template-columns:1fr}
+  .feature{border-right:0}
+  .how-steps{grid-template-columns:1fr}
+  .how-step{border-right:0;border-bottom:1px solid var(--hair)}
+  .how-step:last-child{border-bottom:0}
+  .mast nav{display:none}
+  .spec-table td:first-child{width:140px}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<div class="status">
+  <div class="wrap row">
+    <span><span class="dot"></span>AETHERNET · OPERATIONAL</span>
+    <span class="sep">·</span>
+    <span>NODE STEWARD‑LOCAL</span>
+    <span class="sep">·</span>
+    <span>SIGNED BUNDLE 2026.05.W3</span>
+    <div class="right">
+      <span id="ts">— · —</span>
+      <span class="sep">·</span>
+      <span>v0.1 PROTOTYPE</span>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header class="mast">
+    <div class="brand">
+      <span class="glyph" aria-hidden="true"></span>
+      <a href="index.html">Aethernet</a>
+    </div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="product.html" class="current">Steward</a>
+      <a href="about.html">About</a>
+    </nav>
+    <a href="index.html#console" class="nav-cta">Try console →</a>
+  </header>
+
+  <!-- hero -->
+  <section class="hero" style="border-top:0;padding-top:68px">
+    <div class="kicker reveal reveal-1">§ 01 — The device</div>
+    <h1 class="reveal reveal-2">Steward.<br><em>Local first.</em></h1>
+    <div class="sub">
+      <div>
+        <p class="lede reveal reveal-3">A trusted local AI appliance designed to sit quietly in the corner of your room — not to watch you, not to report back, not to push you toward more cloud.</p>
+        <div class="meta reveal reveal-3">A quieter machine for real life</div>
+        <div class="actions reveal reveal-4">
+          <a href="#features" class="btn-primary">See features</a>
+          <a href="#specs" class="btn-ghost">Specifications</a>
+        </div>
+      </div>
+      <div class="device-wrap reveal reveal-4" aria-label="Steward device illustration" aria-hidden="true">
+        <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+          <defs>
+            <linearGradient id="case2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22201A"/><stop offset="1" stop-color="#0D0C09"/></linearGradient>
+            <linearGradient id="grill2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3A3730" stop-opacity=".0"/><stop offset=".5" stop-color="#3A3730" stop-opacity=".5"/><stop offset="1" stop-color="#3A3730" stop-opacity=".0"/></linearGradient>
+          </defs>
+          <ellipse cx="200" cy="272" rx="148" ry="7" fill="#000" opacity=".13"/>
+          <rect x="58" y="78" width="284" height="172" rx="10" fill="url(#case2)"/>
+          <rect x="58" y="78" width="284" height="13" rx="10" fill="#2E2B23" opacity=".9"/>
+          <g transform="translate(78,108)">
+            <rect width="138" height="122" rx="4" fill="#15140F"/>
+            <g fill="#3A3730" opacity=".65"><g id="dots2"></g></g>
+            <rect width="138" height="122" rx="4" fill="url(#grill2)" opacity=".3"/>
+          </g>
+          <g transform="translate(234,108)">
+            <rect width="88" height="54" rx="3" fill="#0A0907"/>
+            <rect x="6" y="7" width="38" height="3.5" rx="1.5" fill="#4F6A3D"/>
+            <rect x="6" y="16" width="62" height="2" rx="1" fill="#7A7363" opacity=".5"/>
+            <rect x="6" y="22" width="50" height="2" rx="1" fill="#7A7363" opacity=".5"/>
+            <rect x="6" y="28" width="58" height="2" rx="1" fill="#7A7363" opacity=".5"/>
+            <rect x="6" y="34" width="42" height="2" rx="1" fill="#7A7363" opacity=".5"/>
+            <circle cx="77" cy="44" r="2.5" fill="#4F6A3D"/>
+            <circle cx="77" cy="44" r="5.5" fill="none" stroke="#4F6A3D" stroke-opacity=".3"/>
+          </g>
+          <g transform="translate(234,176)">
+            <rect width="88" height="36" rx="3" fill="#0A0907"/>
+            <rect x="6" y="8" width="24" height="2" rx="1" fill="#7A7363" opacity=".4"/>
+            <rect x="6" y="14" width="50" height="2" rx="1" fill="#7A7363" opacity=".4"/>
+            <rect x="6" y="20" width="36" height="2" rx="1" fill="#7A7363" opacity=".4"/>
+            <rect x="6" y="26" width="18" height="2" rx="1" fill="#4F6A3D" opacity=".7"/>
+          </g>
+          <g transform="translate(338,178)">
+            <circle r="20" fill="#15140F"/>
+            <circle r="20" fill="none" stroke="#3A3730"/>
+            <circle r="2.5" fill="#4F6A3D"/>
+            <line x1="0" y1="0" x2="0" y2="-14" stroke="#4F6A3D" stroke-width="1.5" stroke-linecap="round"/>
+          </g>
+          <rect x="98" y="248" width="204" height="5" rx="2" fill="#0A0907"/>
+          <text x="78" y="246" fill="#4A463A" font-family="IBM Plex Mono, monospace" font-size="8.5" letter-spacing="2.5">STEWARD</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- features -->
+  <section id="features">
+    <div class="section-head fade-in">
+      <div>
+        <div class="num">§ 02 — Features</div>
+        <h2 style="margin-top:6px">What Steward actually does.</h2>
+      </div>
+      <div class="aside">Designed around what most AI systems refuse to offer.</div>
+    </div>
+    <div class="feature-grid fade-in">
+      <div class="feature">
+        <div class="f-num">01</div>
+        <h3>Local‑first inference</h3>
+        <p>Answers your questions using a model stored on the device itself. No cloud round-trip, no latency, no data leaving your home.</p>
+        <span class="f-badge low">Privacy · high</span>
+      </div>
+      <div class="feature">
+        <div class="f-num">02</div>
+        <h3>Signed update bundles</h3>
+        <p>Model updates arrive as cryptographically signed packages. Verify before install. Weekly cadence by default, monthly or manual if you prefer.</p>
+        <span class="f-badge low">Verified · always</span>
+      </div>
+      <div class="feature">
+        <div class="f-num">03</div>
+        <h3>Offline knowledge packs</h3>
+        <p>Curated knowledge sets — medical basics, civic information, local maps, education packs — stored on‑device and updated on your schedule.</p>
+        <span class="f-badge low">Works offline</span>
+      </div>
+      <div class="feature">
+        <div class="f-num">04</div>
+        <h3>Visible cloud handoff</h3>
+        <p>When Steward needs to escalate to cloud AI, it tells you before it does — what it's sending, why, and how to cancel. No silent data transfers.</p>
+        <span class="f-badge sky">Transparent</span>
+      </div>
+      <div class="feature">
+        <div class="f-num">05</div>
+        <h3>Responsible compute panel</h3>
+        <p>Every response shows its estimated privacy exposure, energy use, water use, and carbon impact. Numbers are estimates, not marketing. Informed use, not guilt.</p>
+        <span class="f-badge low">Impact · visible</span>
+      </div>
+      <div class="feature">
+        <div class="f-num">06</div>
+        <h3>Open audit log</h3>
+        <p>A local, human-readable record of every request, routing decision, and cloud handoff. Yours to read, export, or delete at any time.</p>
+        <span class="f-badge sky">Open · auditable</span>
+      </div>
+      <div class="feature">
+        <div class="f-num">07</div>
+        <h3>Low‑power idle</h3>
+        <p>When not in use, Steward draws minimal power. No always-on cloud polling, no background model updates without your permission.</p>
+        <span class="f-badge low">Energy · low</span>
+      </div>
+      <div class="feature">
+        <div class="f-num">08</div>
+        <h3>Smart routing</h3>
+        <p>Built-in intent classifier decides whether a request should go to local AI, web search, cloud AI, or a direct database — and explains why.</p>
+        <span class="f-badge sky">Routing · visible</span>
+      </div>
+      <div class="feature">
+        <div class="f-num">09</div>
+        <h3>Private archive</h3>
+        <p>Store your own documents, notes, and files locally. Ask questions about them without uploading anything to a third-party server.</p>
+        <span class="f-badge low">Data · yours</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- how it works -->
+  <section id="how">
+    <div class="section-head fade-in">
+      <div>
+        <div class="num">§ 03 — How it works</div>
+        <h2 style="margin-top:6px">A request, step by step.</h2>
+      </div>
+      <div class="aside">Nothing happens without Steward telling you what it's doing.</div>
+    </div>
+    <div class="how-steps fade-in">
+      <div class="how-step">
+        <div class="step-n">01</div>
+        <h4>You ask</h4>
+        <p>Type or speak your question. Steward classifies it instantly: shape task, factual lookup, calculation, or deep reasoning.</p>
+      </div>
+      <div class="how-step">
+        <div class="step-n">02</div>
+        <h4>Steward routes</h4>
+        <p>Local AI, web search, or cloud — chosen based on the question, not the default. You see the routing decision and can override it.</p>
+      </div>
+      <div class="how-step">
+        <div class="step-n">03</div>
+        <h4>Impact is shown</h4>
+        <p>Privacy, energy, water, and carbon estimates appear for each response. Not as warnings — as information.</p>
+      </div>
+      <div class="how-step">
+        <div class="step-n">04</div>
+        <h4>Logged locally</h4>
+        <p>The request, routing decision, and response are written to your local audit log. No external telemetry. No data sold.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- specs -->
+  <section id="specs">
+    <div class="section-head fade-in">
+      <div>
+        <div class="num">§ 04 — Specifications</div>
+        <h2 style="margin-top:6px">What's inside.</h2>
+      </div>
+      <div class="aside">Placeholder · concept hardware for v0.1</div>
+    </div>
+    <div class="spec-wrap fade-in">
+      <table class="spec-table" aria-label="Steward device specifications">
+        <tr><td>Model</td><td><b>Steward One</b> · local AI appliance · v0.1 concept</td></tr>
+        <tr><td>Inference</td><td><b>On-device</b> · quantized 7B parameter model · runs without internet</td></tr>
+        <tr><td>Storage</td><td><b>512 GB</b> local SSD · expandable · encrypted at rest</td></tr>
+        <tr><td>Knowledge packs</td><td><b>Swappable</b> · medical basics, civic information, education, local maps</td></tr>
+        <tr><td>Updates</td><td><b>Signed bundles</b> · weekly, monthly, or manual · USB sideload supported</td></tr>
+        <tr><td>Connectivity</td><td><b>Ethernet + WiFi</b> · cloud connection optional and always announced</td></tr>
+        <tr><td>Power</td><td><b>≈ 8 W idle · ≈ 35 W active</b> · no always-on cloud polling</td></tr>
+        <tr><td>Privacy</td><td><b>No telemetry</b> · local audit log · no data sold or shared</td></tr>
+        <tr><td>Routing</td><td><b>Local AI → Search → Cloud AI</b> · classifier built-in · user-overridable</td></tr>
+        <tr><td>Compatible with</td><td>Aethernet Console · Aethernet knowledge packs · Aethernet update network</td></tr>
+        <tr><td>Status</td><td><b>Concept · v0.1 prototype</b> · hardware specifications are illustrative</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- comparison -->
+  <section id="compare">
+    <div class="section-head fade-in">
+      <div>
+        <div class="num">§ 05 — Comparison</div>
+        <h2 style="margin-top:6px">Steward vs. the default.</h2>
+      </div>
+      <div class="aside">Most AI devices don't tell you this.</div>
+    </div>
+    <div class="compare fade-in">
+      <div class="compare-col steward">
+        <div class="compare-head">
+          <h3>Steward</h3>
+          <div class="ch-tag">Aethernet · responsible</div>
+        </div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="cr-icon cr-yes">✓</span><div class="cr-text"><b>Local inference</b> — model lives on device, not in a data center</div></div>
+          <div class="compare-row"><span class="cr-icon cr-yes">✓</span><div class="cr-text"><b>Visible cloud handoff</b> — tells you before sending anything</div></div>
+          <div class="compare-row"><span class="cr-icon cr-yes">✓</span><div class="cr-text"><b>Signed updates</b> — cryptographically verified, no silent changes</div></div>
+          <div class="compare-row"><span class="cr-icon cr-yes">✓</span><div class="cr-text"><b>Offline capable</b> — works without internet connection</div></div>
+          <div class="compare-row"><span class="cr-icon cr-yes">✓</span><div class="cr-text"><b>Resource transparency</b> — shows energy, water, and carbon per request</div></div>
+          <div class="compare-row"><span class="cr-icon cr-yes">✓</span><div class="cr-text"><b>Open audit log</b> — every request logged locally, readable by you</div></div>
+          <div class="compare-row"><span class="cr-icon cr-yes">✓</span><div class="cr-text"><b>Tells you to use search</b> — when a web page would be more accurate</div></div>
+        </div>
+      </div>
+      <div class="compare-col">
+        <div class="compare-head">
+          <h3>Typical cloud AI device</h3>
+          <div class="ch-tag">Conventional · opaque</div>
+        </div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="cr-icon cr-no">✗</span><div class="cr-text">Always-on cloud inference — every request leaves your home</div></div>
+          <div class="compare-row"><span class="cr-icon cr-no">✗</span><div class="cr-text">Silent data transfers — no announcement, no opt-out per request</div></div>
+          <div class="compare-row"><span class="cr-icon cr-no">✗</span><div class="cr-text">Automatic updates — model changes without your knowledge</div></div>
+          <div class="compare-row"><span class="cr-icon cr-no">✗</span><div class="cr-text">Requires internet — offline mode is absent or severely limited</div></div>
+          <div class="compare-row"><span class="cr-icon cr-no">✗</span><div class="cr-text">No resource information — environmental cost is invisible</div></div>
+          <div class="compare-row"><span class="cr-icon cr-no">✗</span><div class="cr-text">No audit log — you cannot see what was sent or stored</div></div>
+          <div class="compare-row"><span class="cr-icon cr-no">✗</span><div class="cr-text">Optimizes for AI engagement — never suggests a simpler tool</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand">Aethernet</div>
+        <div class="footer-desc">Responsible AI infrastructure for ordinary people,<br>small businesses, schools, studios, families, and communities.</div>
+        <div class="footer-links">
+          <a href="index.html">Home</a>
+          <a href="about.html">About</a>
+          <a href="manifesto.md">Manifesto</a>
+          <a href="roadmap.md">Roadmap</a>
+        </div>
+      </div>
+      <nav class="footer-nav">
+        <a href="#features">Features</a>
+        <a href="#how">How it works</a>
+        <a href="#specs">Specs</a>
+        <a href="#compare">Compare</a>
+      </nav>
+    </div>
+    <div class="footer-copy">
+      <span>Aethernet · Steward · local‑first AI appliance</span>
+      <span>v0.1 · concept · placeholder specifications</span>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+const progressBar = document.getElementById('progress');
+window.addEventListener('scroll',()=>{const h=document.documentElement;progressBar.style.transform=`scaleX(${h.scrollTop/(h.scrollHeight-h.clientHeight)})`;},{passive:true});
+function stamp(){const d=new Date(),pad=n=>String(n).padStart(2,'0');return `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} · ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`}
+function tick(){document.getElementById('ts').textContent=stamp()}tick();setInterval(tick,1000);
+(function(){
+  ['dots2'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    const cols=18,rows=15,sx=7.5,sy=8,ox=4,oy=5;let svg='';
+    for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)svg+=`<circle cx="${ox+c*sx}" cy="${oy+r*sy}" r="1.1"/>`;
+    el.innerHTML=svg;
+  });
+})();
+const fader=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');fader.unobserve(e.target)}})},{rootMargin:'0px 0px -80px 0px'});
+document.querySelectorAll('.fade-in').forEach(el=>fader.observe(el));
+</script>
+</body>
+</html>
