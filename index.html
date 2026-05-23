@@ -560,6 +560,33 @@ section + section{border-top:1px solid var(--hair)}
   font-size:13px;color:var(--ink-soft);line-height:1.45;
 }
 .router-value b{color:var(--ink);font-weight:500}
+.router-value.result{
+  font-family:var(--mono);font-size:12px;
+  white-space:pre-wrap;color:var(--ink);
+}
+.router-value.result .muted{color:var(--ink-mute)}
+.handoff{
+  display:flex;flex-direction:column;gap:10px;white-space:normal;
+}
+.handoff-title{
+  font-family:var(--display);font-size:20px;line-height:1.1;color:var(--ink);
+}
+.handoff-meta{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-mute);
+}
+.handoff-list{
+  margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;
+}
+.handoff-list li{
+  color:var(--ink-soft);font-family:var(--sans);font-size:13px;line-height:1.4;
+}
+.handoff-list b{color:var(--ink);font-weight:500}
+.handoff-code{
+  display:block;padding:10px;border:1px solid var(--hair);
+  border-radius:var(--r);background:var(--paper);
+  overflow-wrap:anywhere;color:var(--ink-soft);
+}
 .examples{
   display:grid;grid-template-columns:repeat(2,1fr);
   gap:8px;margin-top:14px;
@@ -1157,10 +1184,14 @@ footer{
             <div class="router-label">Next</div>
             <div class="router-value" id="routeNext">For v0, this is a working routing simulation. The same contract becomes the backend API later.</div>
           </div>
+          <div class="router-row">
+            <div class="router-label">Result</div>
+            <div class="router-value result" id="routeResult"><span class="muted">No route executed yet.</span></div>
+          </div>
         </div>
 
         <div class="examples" aria-label="Example routing requests">
-          <button class="example" data-example="What is 18% of 240?">Calculator, no AI</button>
+          <button class="example" data-example="18% of 240">Calculator, no AI</button>
           <button class="example" data-example="What's the weather in Los Angeles tomorrow?">Current fact, search</button>
           <button class="example" data-example="Rewrite this client email so it sounds calm and clear.">Private writing, local</button>
           <button class="example" data-example="Compare three pricing models for a responsible AI app.">Hard reasoning, cloud</button>
@@ -1622,6 +1653,7 @@ const recText  = document.getElementById('recText');
 const routeDecision = document.getElementById('routeDecision');
 const routeWhy = document.getElementById('routeWhy');
 const routeNext = document.getElementById('routeNext');
+const routeResult = document.getElementById('routeResult');
 
 function selectMode(mode){
   modeBtns.forEach(x=>x.setAttribute('aria-pressed', x.dataset.mode === mode ? 'true' : 'false'));
@@ -1640,6 +1672,17 @@ function classify(text){
     next:'The first product is the router. Model training comes later, if the routing data proves it is worth it.'
   };
 
+  if (/^[\d\s.,+\-*/x×÷=()%]+$/.test(t) || /\d+(?:\.\d+)?\s*%\s+of\s+\d+(?:\.\d+)?/.test(t) || /\b(convert|in (km|miles|kg|lbs|°c|°f|usd|eur|gbp)|how many .* in)\b/.test(t))
+    return {
+      mode:'none',
+      cls:'n',
+      label:'No AI needed',
+      text:'This is a direct-tool question. No model recommended.',
+      decision:'No AI is the best route.',
+      why:'The answer is deterministic. A calculator or rule beats a probabilistic model.',
+      next:'Run the direct tool locally and spend zero model compute.'
+    };
+
   if (/\b(today|tonight|tomorrow|right now|currently|weather|forecast|news|headlines|score|stock|price|exchange rate|open(ing)? hours|when does|when is|address of|directions|near me|menu|showtimes)\b/.test(t) || /\$[\d,]+/.test(t))
     return {
       mode:'search',
@@ -1649,17 +1692,6 @@ function classify(text){
       decision:'Search is the right route.',
       why:'This depends on current or source-specific information. A model would be guessing from stale memory.',
       next:'Open search, show sources, and use AI only to summarize after the source is visible.'
-    };
-
-  if (/^[\d\s.,+\-*/x×÷=()%]+$/.test(t) || /\b(convert|in (km|miles|kg|lbs|°c|°f|usd|eur|gbp)|how many .* in)\b/.test(t))
-    return {
-      mode:'none',
-      cls:'n',
-      label:'No AI needed',
-      text:'This is a direct-tool question. No model recommended.',
-      decision:'No AI is the best route.',
-      why:'The answer is deterministic. A calculator or rule beats a probabilistic model.',
-      next:'Run the direct tool locally and spend zero model compute.'
     };
 
   if (/\b(strategy|business plan|analyze deeply|long[- ]?term|compare options|trade[- ]?offs?|root cause|architect|design system|legal analysis|tax strategy|financial model|risk assessment|investment|acquisition)\b/.test(t))
@@ -1717,6 +1749,142 @@ function classify(text){
   };
 }
 
+function escapeHtml(value){
+  return String(value).replace(/[&<>"']/g, ch => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+  }[ch]));
+}
+
+function cleanExpression(text){
+  let expr = (text || '').toLowerCase();
+  expr = expr.replace(/what is|what's|calculate|solve|equals?|please|answer/gi, ' ');
+  expr = expr.replace(/(\d+(?:\.\d+)?)\s*%\s+of\s+(\d+(?:\.\d+)?)/gi, '($1/100)*$2');
+  expr = expr.replace(/\bpercent of\b/g, '/100*');
+  expr = expr.replace(/\bplus\b/g, '+');
+  expr = expr.replace(/\bminus\b/g, '-');
+  expr = expr.replace(/\btimes\b|\bmultiplied by\b|×/g, '*');
+  expr = expr.replace(/\bdivided by\b|÷/g, '/');
+  expr = expr.replace(/x/g, '*');
+  expr = expr.replace(/,/g, '');
+  expr = expr.replace(/[^0-9+\-*/().%\s]/g, ' ');
+  expr = expr.replace(/%/g, '/100');
+  return expr.replace(/\s+/g, ' ').trim();
+}
+
+function tryLocalCalculation(text){
+  const expr = cleanExpression(text);
+  if (!expr || !/[0-9]/.test(expr) || /[+\-*/]{2,}/.test(expr)) return null;
+  if (!/^[0-9+\-*/().\s]+$/.test(expr)) return null;
+  try{
+    const value = Function('"use strict"; return (' + expr + ')')();
+    if (typeof value !== 'number' || !Number.isFinite(value)) return null;
+    const rounded = Math.abs(value) >= 1000 ? value.toLocaleString(undefined, { maximumFractionDigits: 6 }) : Number(value.toFixed(8)).toString();
+    return { expression: expr, answer: rounded };
+  }catch(e){
+    return null;
+  }
+}
+
+function routeReceipt(r){
+  return {
+    route:r.mode,
+    confidence:r.mode === 'none' ? 'high' : r.mode === 'local' ? 'medium' : 'medium-high',
+    impact:presets[r.mode]?.carbon?.[1] || 'estimated',
+    fallback:r.mode === 'none' ? 'local AI if the direct tool fails' : 'ask before escalation'
+  };
+}
+
+function compactQuery(text){
+  return (text || '')
+    .replace(/[?!.]+$/g, '')
+    .replace(/\b(what's|what is|show me|find|look up|search for|please)\b/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function renderHandoff(title, meta, items, code){
+  routeResult.innerHTML =
+    '<div class="handoff">' +
+      '<div class="handoff-title">' + escapeHtml(title) + '</div>' +
+      '<div class="handoff-meta">' + escapeHtml(meta) + '</div>' +
+      '<ul class="handoff-list">' + items.map(item => '<li>' + item + '</li>').join('') + '</ul>' +
+      (code ? '<code class="handoff-code">' + escapeHtml(code) + '</code>' : '') +
+    '</div>';
+}
+
+function renderResult(r, text){
+  if (!text.trim()){
+    routeResult.innerHTML = '<span class="muted">No route executed yet.</span>';
+    return;
+  }
+  const receipt = routeReceipt(r);
+  const calc = r.mode === 'none' ? tryLocalCalculation(text) : null;
+  if (calc){
+    routeResult.innerHTML =
+      'answer: ' + escapeHtml(calc.answer) + '\n' +
+      'tool: local calculator\n' +
+      'expression: ' + escapeHtml(calc.expression) + '\n' +
+      'receipt: ' + escapeHtml(JSON.stringify(receipt));
+    return;
+  }
+  if (r.mode === 'search'){
+    const query = compactQuery(text);
+    renderHandoff(
+      'Source-first search handoff',
+      'Connector planned · no model memory used',
+      [
+        '<b>Query:</b> ' + escapeHtml(query || text),
+        '<b>Sources:</b> official pages, primary records, recent reporting',
+        '<b>AI role:</b> summarize only after sources are visible'
+      ],
+      JSON.stringify(receipt)
+    );
+    return;
+  }
+  if (r.mode === 'cloud'){
+    renderHandoff(
+      'Cloud approval required',
+      'Visible handoff · user chooses on purpose',
+      [
+        '<b>Provider:</b> not selected yet',
+        '<b>Why cloud:</b> higher-context reasoning may be useful',
+        '<b>Before sending:</b> show privacy, carbon, and estimated money cost'
+      ],
+      JSON.stringify(receipt)
+    );
+    return;
+  }
+  if (r.mode === 'offline'){
+    renderHandoff(
+      'Offline bundle lookup',
+      'Signed local pack · no network required',
+      [
+        '<b>Bundle:</b> civic / emergency / reference pack',
+        '<b>Trust:</b> show source, signature, and bundle date',
+        '<b>Fallback:</b> offer web verification if connected'
+      ],
+      JSON.stringify(receipt)
+    );
+    return;
+  }
+  if (r.mode === 'local'){
+    renderHandoff(
+      'Local model placeholder',
+      'Ollama / llama.cpp connector planned',
+      [
+        '<b>Data:</b> stays on device by default',
+        '<b>Good for:</b> drafting, rewriting, summarizing, naming, planning',
+        '<b>Escalation:</b> ask before search or cloud'
+      ],
+      JSON.stringify(receipt)
+    );
+    return;
+  }
+  routeResult.innerHTML =
+    '<span class="muted">route receipt: ' + escapeHtml(JSON.stringify(receipt)) + '\n' +
+    'execution: not connected yet. This route will hand off to a real connector in the next build.</span>';
+}
+
 function updateRec(){
   const r = classify(q.value);
   recBadge.className = 'badge ' + r.cls;
@@ -1726,6 +1894,7 @@ function updateRec(){
   routeWhy.textContent = r.why;
   routeNext.textContent = r.next;
   selectMode(r.mode);
+  renderResult(r, q.value);
 }
 q.addEventListener('input', updateRec);
 
