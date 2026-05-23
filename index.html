@@ -561,15 +561,14 @@ section + section{border-top:1px solid var(--hair)}
 }
 .router-value b{color:var(--ink);font-weight:500}
 .router-value.result{
-  font-family:var(--mono);font-size:12px;
-  white-space:pre-wrap;color:var(--ink);
+  white-space:normal;color:var(--ink);
 }
 .router-value.result .muted{color:var(--ink-mute)}
 .handoff{
   display:flex;flex-direction:column;gap:10px;white-space:normal;
 }
 .handoff-title{
-  font-family:var(--display);font-size:20px;line-height:1.1;color:var(--ink);
+  font-family:var(--display);font-size:24px;line-height:1.14;color:var(--ink);
 }
 .handoff-meta{
   font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;
@@ -586,6 +585,11 @@ section + section{border-top:1px solid var(--hair)}
   display:block;padding:10px;border:1px solid var(--hair);
   border-radius:var(--r);background:var(--paper);
   overflow-wrap:anywhere;color:var(--ink-soft);
+  font-family:var(--mono);font-size:10.5px;white-space:pre-wrap;
+}
+.quiet-receipt{
+  margin-top:2px;font-family:var(--mono);font-size:10px;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--ink-mute);
 }
 .examples{
   display:grid;grid-template-columns:repeat(2,1fr);
@@ -1185,7 +1189,7 @@ footer{
             <div class="router-value" id="routeNext">For v0, this is a working routing simulation. The same contract becomes the backend API later.</div>
           </div>
           <div class="router-row">
-            <div class="router-label">Result</div>
+            <div class="router-label">Answer</div>
             <div class="router-value result" id="routeResult"><span class="muted">No route executed yet.</span></div>
           </div>
         </div>
@@ -1802,6 +1806,10 @@ function compactQuery(text){
     .trim();
 }
 
+function receiptLine(receipt){
+  return 'Route: ' + receipt.route + ' · Impact: ' + receipt.impact + ' · Confidence: ' + receipt.confidence;
+}
+
 function renderHandoff(title, meta, items, code){
   routeResult.innerHTML =
     '<div class="handoff">' +
@@ -1815,12 +1823,11 @@ function renderHandoff(title, meta, items, code){
 async function fetchOfflinePack(text, receipt){
   if (!location.protocol.startsWith('http')){
     renderHandoff(
-      'Offline bundle lookup',
-      'Local server needed',
+      'Open through the local server to use offline packs.',
+      'Offline pack unavailable from file view',
       [
-        '<b>Status:</b> open this page through <code>npm start</code> to query the demo pack',
-        '<b>Static fallback:</b> the route is correct, but file:// pages cannot call /offline',
-        '<b>Receipt:</b> ' + escapeHtml(JSON.stringify(receipt))
+        'Run <b>npm start</b>, then open <b>http://127.0.0.1:4180</b>.',
+        '<span class="quiet-receipt">' + escapeHtml(receiptLine(receipt)) + '</span>'
       ],
       ''
     );
@@ -1833,27 +1840,26 @@ async function fetchOfflinePack(text, receipt){
     if (!res.ok) throw new Error('Offline connector returned ' + res.status);
     const data = await res.json();
     const items = data.results.length
-      ? data.results.map(item => '<b>' + escapeHtml(item.title) + ':</b> ' + escapeHtml(item.body))
-      : ['<b>No local match:</b> try a query like power outage, wildfire, earthquake, or first aid.'];
+      ? data.results.map(item => '<b>' + escapeHtml(item.title) + '</b><br>' + escapeHtml(item.body))
+      : ['No local match. Try <b>power outage</b>, <b>wildfire</b>, <b>earthquake</b>, or <b>first aid</b>.'];
     renderHandoff(
-      'Offline bundle result',
-      data.pack.title + ' · ' + data.pack.version + ' · ' + data.pack.signature,
+      data.results.length ? data.results[0].title : 'No offline answer found.',
+      data.pack.title + ' · ' + data.pack.version,
       [
-        '<b>Query:</b> ' + escapeHtml(data.query),
-        '<b>Pack date:</b> ' + escapeHtml(data.pack.updated),
-        ...items
+        ...items,
+        '<span class="quiet-receipt">Pack date: ' + escapeHtml(data.pack.updated) + ' · Signature: ' + escapeHtml(data.pack.signature) + ' · ' + escapeHtml(receiptLine(receipt)) + '</span>'
       ],
-      JSON.stringify(receipt)
+      ''
     );
   }catch(e){
     renderHandoff(
-      'Offline connector unavailable',
+      'I cannot reach the offline pack yet.',
       'Local route selected · no network sent',
       [
-        '<b>Error:</b> ' + escapeHtml(e.message),
-        '<b>Next:</b> run <code>npm start</code> from the ae folder and open the local URL'
+        'Run <b>npm start</b> from the ae folder and open the local URL.',
+        '<span class="quiet-receipt">Error: ' + escapeHtml(e.message) + ' · ' + escapeHtml(receiptLine(receipt)) + '</span>'
       ],
-      JSON.stringify(receipt)
+      ''
     );
   }
 }
@@ -1867,36 +1873,36 @@ function renderResult(r, text){
   const calc = r.mode === 'none' ? tryLocalCalculation(text) : null;
   if (calc){
     routeResult.innerHTML =
-      'answer: ' + escapeHtml(calc.answer) + '\n' +
-      'tool: local calculator\n' +
-      'expression: ' + escapeHtml(calc.expression) + '\n' +
-      'receipt: ' + escapeHtml(JSON.stringify(receipt));
+      '<div class="handoff">' +
+        '<div class="handoff-title">' + escapeHtml(calc.answer) + '</div>' +
+        '<div class="handoff-meta">Calculated locally</div>' +
+        '<div class="quiet-receipt">Expression: ' + escapeHtml(calc.expression) + ' · ' + escapeHtml(receiptLine(receipt)) + '</div>' +
+      '</div>';
     return;
   }
   if (r.mode === 'search'){
     const query = compactQuery(text);
     renderHandoff(
-      'Source-first search handoff',
-      'Connector planned · no model memory used',
+      'I would search for this.',
+      'Search connector not connected yet',
       [
-        '<b>Query:</b> ' + escapeHtml(query || text),
-        '<b>Sources:</b> official pages, primary records, recent reporting',
-        '<b>AI role:</b> summarize only after sources are visible'
+        'Search query: <b>' + escapeHtml(query || text) + '</b>',
+        'I would use official pages, primary records, or recent reporting first.',
+        '<span class="quiet-receipt">' + escapeHtml(receiptLine(receipt)) + '</span>'
       ],
-      JSON.stringify(receipt)
+      ''
     );
     return;
   }
   if (r.mode === 'cloud'){
     renderHandoff(
-      'Cloud approval required',
-      'Visible handoff · user chooses on purpose',
+      'This needs stronger reasoning.',
+      'Cloud connector not connected yet',
       [
-        '<b>Provider:</b> not selected yet',
-        '<b>Why cloud:</b> higher-context reasoning may be useful',
-        '<b>Before sending:</b> show privacy, carbon, and estimated money cost'
+        'Before sending anything, Tilth would ask for approval and show provider, privacy, carbon, and estimated money cost.',
+        '<span class="quiet-receipt">' + escapeHtml(receiptLine(receipt)) + '</span>'
       ],
-      JSON.stringify(receipt)
+      ''
     );
     return;
   }
@@ -1906,14 +1912,13 @@ function renderResult(r, text){
   }
   if (r.mode === 'local'){
     renderHandoff(
-      'Local model placeholder',
-      'Ollama / llama.cpp connector planned',
+      'I would answer this locally.',
+      'Local model connector not connected yet',
       [
-        '<b>Data:</b> stays on device by default',
-        '<b>Good for:</b> drafting, rewriting, summarizing, naming, planning',
-        '<b>Escalation:</b> ask before search or cloud'
+        'This is the kind of request a small local model should handle without cloud handoff.',
+        '<span class="quiet-receipt">' + escapeHtml(receiptLine(receipt)) + '</span>'
       ],
-      JSON.stringify(receipt)
+      ''
     );
     return;
   }
