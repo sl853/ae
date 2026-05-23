@@ -62,6 +62,42 @@ function classify(text) {
     };
   }
 
+  if (/\b(symptom|symptoms|diagnosis|diagnose|doctor|dentist|medication|medicine|prescription|dose|dosage|side effect|rash|fever|pain|migraine|blood pressure|lab result|test result|urgent care|er|emergency room|therapy|mental health|anxiety|depression)\b/.test(t)) {
+    return {
+      route: 'search',
+      label: 'Health sources',
+      decision: 'Health questions need grounded sources.',
+      reason: 'Tilth can explain terms and prepare questions, but it should not invent medical guidance from model memory.',
+      next_action: 'Fetch trusted medical sources, show them, then summarize with clear limits and escalation language.',
+      confidence: 'medium-high',
+      requires_approval: false
+    };
+  }
+
+  if (/\b(map|maps|directions|traffic|route to|near me|nearby|address of|open(ing)? hours|weather|forecast|appointment|pharmacy|restaurant|store|gas station|parking)\b/.test(t)) {
+    return {
+      route: 'search',
+      label: 'Maps/local',
+      decision: 'A location tool is the right route.',
+      reason: 'Places, hours, routes, traffic, and weather change. A model should not guess.',
+      next_action: 'Use search/maps data first, then summarize only what the source returns.',
+      confidence: 'medium-high',
+      requires_approval: false
+    };
+  }
+
+  if (/\b(gossip|celebrity|celebrity news|tiktok drama|instagram drama|viral drama|who is dating|breakup rumor|scandal|influencer)\b/.test(t)) {
+    return {
+      route: 'search',
+      label: 'Low-priority web',
+      decision: 'Search is enough for entertainment churn.',
+      reason: 'This is usually current, low-stakes, and source-dependent. It does not need model reasoning.',
+      next_action: 'Return source links plainly without turning it into an engagement surface.',
+      confidence: 'medium',
+      requires_approval: false
+    };
+  }
+
   if (/\b(today|tonight|tomorrow|right now|currently|weather|forecast|news|headlines|score|stock|price|exchange rate|open(ing)? hours|when does|when is|address of|directions|near me|menu|showtimes)\b/.test(t) || /\$[\d,]+/.test(t)) {
     return {
       route: 'search',
@@ -95,6 +131,30 @@ function classify(text) {
       next_action: 'Ask for approval, show cost and privacy impact, then route to a cloud model if the user agrees.',
       confidence: 'medium-high',
       requires_approval: true
+    };
+  }
+
+  if (/\b(photo|photos|picture|pictures|image library|camera roll|document|documents|pdf|receipt|receipts|file|files|folder|archive|calendar|reminder|reminders|to[- ]?do|todo|shopping list|packing list|school form|form)\b/.test(t)) {
+    return {
+      route: 'local',
+      label: 'Local tools',
+      decision: 'Local tools are the right first route.',
+      reason: 'This asks Tilth to organize or retrieve private personal material. The archive should not leave the device by default.',
+      next_action: 'Use local file, calendar, photo, or document connectors. Escalate only with explicit approval.',
+      confidence: 'medium',
+      requires_approval: false
+    };
+  }
+
+  if (/\b(write|draft|rewrite|summari[sz]e|outline|explain|brainstorm|name (ideas|suggestions)|translate|polish|edit|tone|email|letter|plan|recipe|story|poem|caption|help me|how do i)\b/.test(t)) {
+    return {
+      route: 'local',
+      label: 'Local AI',
+      decision: 'Local AI is the right first route.',
+      reason: 'This is drafting, rewriting, or shaping. It does not need the open web by default.',
+      next_action: 'Keep the request on the device. Escalate only if the user asks for stronger reasoning.',
+      confidence: 'medium',
+      requires_approval: false
     };
   }
 

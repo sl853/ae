@@ -827,6 +827,40 @@ section + section{border-top:1px solid var(--hair)}
   font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;
   text-transform:uppercase;color:var(--ink-mute);
 }
+.needs-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  border:1px solid var(--hair);
+  border-radius:var(--r);
+  background:var(--surface);
+  overflow:hidden;
+}
+.need-card{
+  padding:22px 20px;
+  border-right:1px solid var(--hair);
+  border-bottom:1px solid var(--hair);
+  min-height:142px;
+}
+.need-card:nth-child(4n){border-right:0}
+.need-card:nth-last-child(-n+4){border-bottom:0}
+.need-card .case-label{margin-bottom:10px}
+.need-card h4{
+  font-family:var(--display);font-size:21px;font-weight:400;
+  line-height:1.1;letter-spacing:-.005em;margin:0 0 8px;
+}
+.need-card p{font-size:13.5px;color:var(--ink-soft);margin:0;line-height:1.48}
+.low-priority{
+  margin-top:12px;
+  display:flex;gap:8px;flex-wrap:wrap;
+}
+.low-priority span{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-mute);
+  border:1px solid var(--hair);
+  border-radius:999px;
+  padding:5px 8px;
+  background:rgba(247,243,232,.48);
+}
 
 /* ------- update settings ------- */
 .updates{
@@ -1061,6 +1095,11 @@ footer{
   .guide{grid-template-columns:1fr}
   .guide > div + div{border-left:0;border-top:1px solid var(--hair)}
   .cases{grid-template-columns:1fr 1fr}
+  .needs-grid{grid-template-columns:1fr 1fr}
+  .need-card:nth-child(4n){border-right:1px solid var(--hair)}
+  .need-card:nth-child(2n){border-right:0}
+  .need-card:nth-last-child(-n+4){border-bottom:1px solid var(--hair)}
+  .need-card:nth-last-child(-n+2){border-bottom:0}
   .case-item{border-right:1px solid var(--hair);border-bottom:1px solid var(--hair)}
   .case-item:nth-child(2n){border-right:0}
   .case-item:last-child{border-bottom:0}
@@ -1080,6 +1119,12 @@ footer{
   .splash-rec-text{white-space:normal}
   .modes{grid-template-columns:1fr}
   .cases{grid-template-columns:1fr}
+  .needs-grid{grid-template-columns:1fr}
+  .need-card,
+  .need-card:nth-child(2n),
+  .need-card:nth-child(4n){border-right:0}
+  .need-card:nth-last-child(-n+2){border-bottom:1px solid var(--hair)}
+  .need-card:last-child{border-bottom:0}
   .case-item{border-right:0}
   .case-item:nth-child(2n){border-right:0}
   .examples{grid-template-columns:1fr}
@@ -1169,9 +1214,9 @@ footer{
       <div class="home-advanced" id="homeAdvanced">
         <div class="examples" aria-label="Example routing requests">
           <button class="example" data-example="18% of 240">Calculator, no AI</button>
-          <button class="example" data-example="What's the weather in Los Angeles tomorrow?">Current fact, search</button>
+          <button class="example" data-example="rash and fever in a child">Health, sources</button>
+          <button class="example" data-example="directions to the nearest pharmacy">Maps/local</button>
           <button class="example" data-example="power outage offline">Offline pack</button>
-          <button class="example" data-example="Compare three pricing models for a responsible AI app.">Hard reasoning, cloud</button>
         </div>
         <div class="splash-chips" aria-label="Routing modes">
           <span class="s-chip c-m">Local by default</span>
@@ -1279,8 +1324,11 @@ footer{
 
         <div class="examples" aria-label="Example routing requests">
           <button class="example" data-example="18% of 240">Calculator, no AI</button>
-          <button class="example" data-example="What's the weather in Los Angeles tomorrow?">Current fact, search</button>
+          <button class="example" data-example="rash and fever in a child">Health, sources</button>
+          <button class="example" data-example="directions to the nearest pharmacy">Maps/local</button>
           <button class="example" data-example="Rewrite this client email so it sounds calm and clear.">Private writing, local</button>
+          <button class="example" data-example="find photos from last summer">Photos/files, local</button>
+          <button class="example" data-example="power outage offline">Offline pack</button>
           <button class="example" data-example="Compare three pricing models for a responsible AI app.">Hard reasoning, cloud</button>
         </div>
 
@@ -1439,6 +1487,66 @@ footer{
         <p>One decision up front. Better defaults after that.</p>
       </div>
       <div class="case-note">Eventually: schools, libraries, rural communities, emergency response. Right now: the households and small businesses that already feel uneasy about where AI is going.</div>
+    </div>
+
+    <div class="section-head fade-in" style="margin-top:56px">
+      <div>
+        <div class="num">§ 02c — Everyday layer</div>
+        <h2 style="margin-top:6px">The things Tilth should actually handle.</h2>
+      </div>
+      <div class="aside">Useful tools first. Engagement loops last.</div>
+    </div>
+    <div class="needs-grid fade-in">
+      <div class="need-card">
+        <div class="case-label">Search</div>
+        <h4>Questions with sources</h4>
+        <p>Current facts, product checks, public records, citations, and anything where the link matters.</p>
+      </div>
+      <div class="need-card">
+        <div class="case-label">Writing</div>
+        <h4>Email and documents</h4>
+        <p>Draft, rewrite, summarize, translate, and organize private work locally before cloud is considered.</p>
+      </div>
+      <div class="need-card">
+        <div class="case-label">Health</div>
+        <h4>Medical navigation</h4>
+        <p>Explain terms, prepare doctor questions, and route symptoms to trusted sources. No pretend diagnosis.</p>
+      </div>
+      <div class="need-card">
+        <div class="case-label">Local</div>
+        <h4>Maps and nearby</h4>
+        <p>Directions, hours, weather, places, appointments, and the ordinary logistics of leaving the house.</p>
+      </div>
+      <div class="need-card">
+        <div class="case-label">Archive</div>
+        <h4>Photos and files</h4>
+        <p>Find, describe, group, and summarize personal media without turning the archive into training data.</p>
+      </div>
+      <div class="need-card">
+        <div class="case-label">Household</div>
+        <h4>Calendar and lists</h4>
+        <p>Reminders, simple planning, packing lists, school forms, recipes, and repeatable home admin.</p>
+      </div>
+      <div class="need-card">
+        <div class="case-label">Protection</div>
+        <h4>Privacy plumbing</h4>
+        <p>Offline mode, local device, encryption, VPN, and eventually private Tilth servers shown plainly.</p>
+      </div>
+      <div class="need-card">
+        <div class="case-label">Resilience</div>
+        <h4>Offline packs</h4>
+        <p>Emergency, repair, health, civic, and small-business references that still work when the web does not.</p>
+      </div>
+    </div>
+    <div class="case-note fade-in" style="border:1px solid var(--hair);border-top:0;border-radius:0 0 var(--r) var(--r)">
+      Low priority by design:
+      <div class="low-priority" aria-label="Low priority categories">
+        <span>Gossip</span>
+        <span>Infinite social</span>
+        <span>Roleplay</span>
+        <span>Celebrity churn</span>
+        <span>Engagement bait</span>
+      </div>
     </div>
   </section>
 
@@ -1825,6 +1933,39 @@ function classify(text){
       next:'Run the direct tool locally and spend zero model compute.'
     };
 
+  if (/\b(symptom|symptoms|diagnosis|diagnose|doctor|dentist|medication|medicine|prescription|dose|dosage|side effect|rash|fever|pain|migraine|blood pressure|lab result|test result|urgent care|er|emergency room|therapy|mental health|anxiety|depression)\b/.test(t))
+    return {
+      mode:'search',
+      cls:'s',
+      label:'Health sources',
+      text:'Use trusted medical sources before any model summary.',
+      decision:'Health questions need grounded sources.',
+      why:'Tilth can explain terms and prepare questions, but it should not invent medical guidance from model memory.',
+      next:'Fetch trusted medical sources, show them, then summarize with clear limits and escalation language.'
+    };
+
+  if (/\b(map|maps|directions|traffic|route to|near me|nearby|address of|open(ing)? hours|weather|forecast|appointment|pharmacy|restaurant|store|gas station|parking)\b/.test(t))
+    return {
+      mode:'search',
+      cls:'s',
+      label:'Maps/local',
+      text:'Use a live local source or map tool.',
+      decision:'A location tool is the right route.',
+      why:'Places, hours, routes, traffic, and weather change. A model should not guess.',
+      next:'Use search/maps data first, then summarize only what the source returns.'
+    };
+
+  if (/\b(gossip|celebrity|celebrity news|tiktok drama|instagram drama|viral drama|who is dating|breakup rumor|scandal|influencer)\b/.test(t))
+    return {
+      mode:'search',
+      cls:'s',
+      label:'Low-priority web',
+      text:'Use search if you ask for it, but Tilth will not optimize around this.',
+      decision:'Search is enough for entertainment churn.',
+      why:'This is usually current, low-stakes, and source-dependent. It does not need model reasoning.',
+      next:'Return source links plainly without turning it into an engagement surface.'
+    };
+
   if (/\b(today|tonight|tomorrow|right now|currently|weather|forecast|news|headlines|score|stock|price|exchange rate|open(ing)? hours|when does|when is|address of|directions|near me|menu|showtimes)\b/.test(t) || /\$[\d,]+/.test(t))
     return {
       mode:'search',
@@ -1845,6 +1986,17 @@ function classify(text){
       decision:'Cloud AI may be justified.',
       why:'This asks for synthesis, tradeoffs, or planning that may exceed a small local model.',
       next:'Ask for approval, show cost and privacy impact, then route to a cloud model if the user agrees.'
+    };
+
+  if (/\b(photo|photos|picture|pictures|image library|camera roll|document|documents|pdf|receipt|receipts|file|files|folder|archive|calendar|reminder|reminders|to[- ]?do|todo|shopping list|packing list|school form|form)\b/.test(t))
+    return {
+      mode:'local',
+      cls:'',
+      label:'Local tools',
+      text:'Personal files should stay on the device first.',
+      decision:'Local tools are the right first route.',
+      why:'This asks Tilth to organize or retrieve private personal material. The archive should not leave the device by default.',
+      next:'Use local file, calendar, photo, or document connectors. Escalate only with explicit approval.'
     };
 
   if (/\b(write|draft|rewrite|summari[sz]e|outline|explain|brainstorm|name (ideas|suggestions)|translate|polish|edit|tone|email|letter|plan|recipe|story|poem|caption|help me|how do i)\b/.test(t))
