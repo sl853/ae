@@ -1812,6 +1812,52 @@ function renderHandoff(title, meta, items, code){
     '</div>';
 }
 
+async function fetchOfflinePack(text, receipt){
+  if (!location.protocol.startsWith('http')){
+    renderHandoff(
+      'Offline bundle lookup',
+      'Local server needed',
+      [
+        '<b>Status:</b> open this page through <code>npm start</code> to query the demo pack',
+        '<b>Static fallback:</b> the route is correct, but file:// pages cannot call /offline',
+        '<b>Receipt:</b> ' + escapeHtml(JSON.stringify(receipt))
+      ],
+      ''
+    );
+    return;
+  }
+
+  routeResult.innerHTML = '<span class="muted">Searching local offline pack...</span>';
+  try{
+    const res = await fetch('/offline?q=' + encodeURIComponent(text), { headers:{ 'Accept':'application/json' } });
+    if (!res.ok) throw new Error('Offline connector returned ' + res.status);
+    const data = await res.json();
+    const items = data.results.length
+      ? data.results.map(item => '<b>' + escapeHtml(item.title) + ':</b> ' + escapeHtml(item.body))
+      : ['<b>No local match:</b> try a query like power outage, wildfire, earthquake, or first aid.'];
+    renderHandoff(
+      'Offline bundle result',
+      data.pack.title + ' · ' + data.pack.version + ' · ' + data.pack.signature,
+      [
+        '<b>Query:</b> ' + escapeHtml(data.query),
+        '<b>Pack date:</b> ' + escapeHtml(data.pack.updated),
+        ...items
+      ],
+      JSON.stringify(receipt)
+    );
+  }catch(e){
+    renderHandoff(
+      'Offline connector unavailable',
+      'Local route selected · no network sent',
+      [
+        '<b>Error:</b> ' + escapeHtml(e.message),
+        '<b>Next:</b> run <code>npm start</code> from the ae folder and open the local URL'
+      ],
+      JSON.stringify(receipt)
+    );
+  }
+}
+
 function renderResult(r, text){
   if (!text.trim()){
     routeResult.innerHTML = '<span class="muted">No route executed yet.</span>';
@@ -1855,16 +1901,7 @@ function renderResult(r, text){
     return;
   }
   if (r.mode === 'offline'){
-    renderHandoff(
-      'Offline bundle lookup',
-      'Signed local pack · no network required',
-      [
-        '<b>Bundle:</b> civic / emergency / reference pack',
-        '<b>Trust:</b> show source, signature, and bundle date',
-        '<b>Fallback:</b> offer web verification if connected'
-      ],
-      JSON.stringify(receipt)
-    );
+    fetchOfflinePack(text, receipt);
     return;
   }
   if (r.mode === 'local'){

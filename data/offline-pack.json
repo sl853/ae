@@ -1,0 +1,40 @@
+{
+  "id": "tilth-demo-offline-pack",
+  "title": "Tilth Demo Offline Pack",
+  "version": "2026.05.W3",
+  "signature": "demo-unsigned",
+  "updated": "2026-05-22",
+  "source_note": "Prototype content for local offline lookup. Replace with reviewed, signed sources before production.",
+  "entries": [
+    {
+      "id": "power-outage-basics",
+      "title": "Power Outage Basics",
+      "tags": ["power", "outage", "emergency", "offline", "refrigerator", "freezer"],
+      "body": "Keep refrigerator and freezer doors closed. A closed refrigerator can keep food cold for about 4 hours. A full freezer can hold temperature for about 48 hours, or 24 hours if half full. Use flashlights instead of candles when possible."
+    },
+    {
+      "id": "wildfire-go-bag",
+      "title": "Wildfire Go-Bag Checklist",
+      "tags": ["wildfire", "evacuation", "emergency", "go bag", "fire"],
+      "body": "Pack water, medications, copies of important documents, phone chargers, masks, a flashlight, batteries, basic first aid, cash, spare keys, and pet supplies. Keep fuel or charge level high when evacuation risk is elevated."
+    },
+    {
+      "id": "earthquake-drop-cover-hold",
+      "title": "Earthquake Immediate Action",
+      "tags": ["earthquake", "emergency", "safety", "offline"],
+      "body": "Drop, cover, and hold on. Stay away from windows and objects that can fall. If outdoors, move away from buildings, trees, streetlights, and utility wires. After shaking stops, check for injuries and hazards."
+    },
+    {
+      "id": "first-aid-bleeding",
+      "title": "Basic Bleeding Control",
+      "tags": ["first aid", "bleeding", "medical", "emergency"],
+      "body": "Apply firm, direct pressure with clean cloth or gauze. Keep pressure steady. If bleeding is severe, call emergency services. Do not remove deeply embedded objects; stabilize them and seek medical help."
+    },
+    {
+      "id": "offline-router-principle",
+      "title": "Tilth Offline Principle",
+      "tags": ["tilth", "offline", "knowledge pack", "signed bundle", "router"],
+      "body": "Offline packs are for durable reference information that should remain available without internet access. Each production pack should show source, date, and signature before the answer is trusted."
+    }
+  ]
+}

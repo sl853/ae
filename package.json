@@ -1,0 +1,9 @@
+{
+  "name": "tilth-router-prototype",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local Tilth router prototype with offline knowledge pack lookup.",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
