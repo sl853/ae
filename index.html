@@ -174,6 +174,110 @@ body::before{
 }
 .mast .nav-cta:hover{ background:var(--ink); color:var(--paper) }
 
+/* ------- splash (search-first viewport) ------- */
+.splash{
+  min-height: calc(100svh - 110px);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:40px 0 80px;
+  position:relative;
+  border-bottom:1px solid var(--hair);
+}
+.splash-inner{
+  width:100%;
+  max-width:660px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:22px;
+}
+.splash-logo{
+  display:flex;align-items:center;gap:12px;
+  font-family:var(--display);font-size:28px;letter-spacing:-.01em;
+}
+.glyph-sm{
+  width:22px;height:22px;
+  border:1px solid var(--ink);border-radius:50%;
+  position:relative;flex:none;
+}
+.glyph-sm::before,.glyph-sm::after{content:"";position:absolute;background:var(--ink)}
+.glyph-sm::before{left:50%;top:4px;bottom:4px;width:1px;transform:translateX(-.5px)}
+.glyph-sm::after{top:50%;left:4px;right:4px;height:1px;transform:translateY(-.5px)}
+.splash-tag{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-mute);margin-top:-6px;
+}
+.splash-box{
+  width:100%;
+  background:var(--surface);
+  border:1px solid var(--hair-strong);
+  border-radius:8px;
+  padding:20px 20px 16px;
+  display:flex;flex-direction:column;gap:0;
+  box-shadow:0 8px 40px rgba(21,20,15,.08);
+  transition:box-shadow var(--transition), border-color var(--transition);
+}
+.splash-box:focus-within{
+  border-color:var(--ink-mute);
+  box-shadow:0 14px 48px rgba(21,20,15,.12);
+}
+.splash-q{
+  width:100%;background:transparent;border:0;outline:0;
+  resize:none;overflow:hidden;
+  font-family:var(--display);font-size:clamp(22px,3vw,30px);
+  line-height:1.3;color:var(--ink);letter-spacing:-.005em;
+  min-height:38px;
+}
+.splash-q::placeholder{color:var(--ink-mute);font-style:italic;opacity:.75}
+.splash-foot{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-top:14px;padding-top:13px;border-top:1px dashed var(--hair);
+  gap:12px;
+}
+.splash-rec{
+  font-family:var(--mono);font-size:11px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-soft);
+  display:flex;align-items:center;gap:10px;flex:1;min-width:0;
+}
+.splash-rec-text{
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;
+}
+.splash-btn{
+  font-family:var(--mono);font-size:11px;letter-spacing:.12em;
+  text-transform:uppercase;padding:9px 16px;
+  border:1px solid var(--ink);border-radius:999px;color:var(--ink);
+  flex:none;
+  transition:background var(--transition),color var(--transition);
+}
+.splash-btn:hover{background:var(--ink);color:var(--paper)}
+.splash-btn:active{transform:scale(.97)}
+.splash-chips{
+  display:flex;gap:8px;flex-wrap:wrap;justify-content:center;
+}
+.s-chip{
+  font-family:var(--mono);font-size:10px;letter-spacing:.08em;
+  text-transform:uppercase;padding:4px 11px;
+  border:1px solid var(--hair);border-radius:999px;
+  color:var(--ink-mute);background:var(--surface);
+  cursor:default;
+}
+.s-chip.c-s{border-color:rgba(58,94,115,.3);color:var(--sky);background:var(--sky-soft)}
+.s-chip.c-r{border-color:rgba(154,63,34,.3);color:var(--rust);background:var(--rust-soft)}
+.s-chip.c-m{border-color:rgba(79,106,61,.3);color:var(--moss);background:var(--moss-soft)}
+.splash-scroll{
+  position:absolute;bottom:26px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:7px;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-mute);
+  animation:bob 2.6s ease-in-out infinite;
+}
+@keyframes bob{
+  0%,100%{transform:translateX(-50%) translateY(0)}
+  50%{transform:translateX(-50%) translateY(5px)}
+}
+
 /* ------- hero ------- */
 .hero{
   display:grid;
@@ -545,11 +649,16 @@ section + section{border-top:1px solid var(--hair)}
 .guide li b{color:var(--ink);font-weight:500}
 .guide .ai h3 small{color:var(--moss)}
 .guide .search h3 small{color:var(--sky)}
+.guidance-kicker{
+  font-family:var(--display);font-size:clamp(22px,2.4vw,30px);
+  line-height:1.25;letter-spacing:-.005em;color:var(--ink);
+  max-width:720px;margin:0 0 24px;
+}
 
 /* ------- use cases strip ------- */
 .cases{
   display:grid;
-  grid-template-columns:repeat(3,1fr);
+  grid-template-columns:repeat(2,1fr);
   gap:0;
   border:1px solid var(--hair);
   border-radius:var(--r);
@@ -561,7 +670,7 @@ section + section{border-top:1px solid var(--hair)}
   padding:24px 26px;
   border-right:1px solid var(--hair);
 }
-.case-item:last-child{ border-right:0 }
+.case-item:nth-child(2n){ border-right:0 }
 .case-item .case-label{
   font-family:var(--mono);font-size:10px;letter-spacing:.14em;
   text-transform:uppercase;color:var(--ink-mute);
@@ -573,6 +682,13 @@ section + section{border-top:1px solid var(--hair)}
 }
 .case-item p{
   font-size:13.5px;color:var(--ink-soft);margin:0;line-height:1.5;
+}
+.case-note{
+  grid-column:1 / -1;
+  padding:18px 26px;
+  border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-mute);
 }
 
 /* ------- update settings ------- */
@@ -731,6 +847,16 @@ footer{
   color:var(--ink-mute);text-transform:uppercase;
   line-height:1.7;max-width:40ch;
 }
+.footer-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  margin-top:16px;padding:7px 10px;border:1px solid var(--hair-strong);
+  border-radius:999px;font-family:var(--mono);font-size:10px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);
+}
+.footer-badge::before{
+  content:"B";display:grid;place-items:center;width:18px;height:18px;
+  border:1px solid currentColor;border-radius:50%;font-weight:500;
+}
 .footer-links{
   display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;
 }
@@ -789,6 +915,8 @@ footer{
   .principle:nth-child(n+3){ border-top:1px solid var(--hair) }
 }
 @media(max-width:980px){
+  .splash{min-height:calc(100svh - 100px);padding:32px 0 72px}
+  .splash-inner{max-width:100%}
   .hero{grid-template-columns:1fr;gap:32px;padding:56px 0 60px}
   .hero .side{border-left:0;border-top:1px solid var(--hair);padding:24px 0 0}
   .console{grid-template-columns:1fr}
@@ -857,14 +985,54 @@ footer{
     <a href="about.html" class="nav-cta">About →</a>
   </header>
 
-  <!-- hero -->
-  <section class="hero" style="border-top:0;padding-top:68px" aria-labelledby="hero-heading">
+  <!-- splash: search-first viewport -->
+  <section class="splash" aria-label="Ask Aethernet">
+    <div class="splash-inner">
+      <div class="splash-logo" aria-hidden="true">
+        <span class="glyph-sm"></span>
+        Aethernet
+      </div>
+      <div class="splash-tag">Better AI, used deliberately.</div>
+
+      <div class="splash-box">
+        <textarea id="splash-q" class="splash-q" rows="1"
+          placeholder="What do you actually need to know?"
+          aria-label="Ask Aethernet"></textarea>
+        <div class="splash-foot">
+          <div class="splash-rec" id="splash-rec" aria-live="polite">
+            <span class="badge" id="splash-badge">Ready</span>
+            <span class="splash-rec-text" id="splash-text">Type a question — Aethernet will suggest where to answer it.</span>
+          </div>
+          <button class="splash-btn" id="splash-btn" aria-label="Route this question">Route →</button>
+        </div>
+      </div>
+
+      <div class="splash-chips" aria-label="Routing modes">
+        <span class="s-chip c-m">Local AI</span>
+        <span class="s-chip c-s">Search</span>
+        <span class="s-chip">Offline</span>
+        <span class="s-chip c-r">Deep reasoning</span>
+      </div>
+    </div>
+
+    <a href="#about" class="splash-scroll" aria-label="Scroll to learn more">
+      <span>Explore</span>
+      <svg width="10" height="14" viewBox="0 0 10 14" fill="none" aria-hidden="true">
+        <path d="M5 1v12M1 8l4 4 4-4" stroke="currentColor" stroke-width="1.2"
+          stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </a>
+  </section>
+
+  <!-- hero / about -->
+  <section class="hero" id="about" style="border-top:0;padding-top:68px" aria-labelledby="hero-heading">
     <div>
       <div class="meta reveal reveal-1" style="margin-bottom:20px">§ 00 — Manifesto</div>
       <h1 class="reveal reveal-2" id="hero-heading">AI for the <em>rest</em> of us.</h1>
       <p class="lede reveal reveal-3">
-        A privacy‑first, low‑energy AI system that helps you decide when to use AI —
-        and just as often, when to reach for something simpler.
+        Responsible AI for people who actually have to live with the consequences.
+        Built to be honest about when AI helps, when something else is better,
+        and what every request costs.
       </p>
       <div class="meta reveal reveal-4">Not more AI everywhere · Better AI, used deliberately</div>
       <div class="actions reveal reveal-5">
@@ -875,16 +1043,16 @@ footer{
     <aside class="side reveal reveal-4" aria-label="Our position">
       <div class="label">Our position</div>
       <div class="position-item" data-n="01">
-        Most AI optimizes for <b>more usage</b>. Aethernet optimizes for <b>appropriate usage</b>.
+        We show you what every request costs — <b>in time, energy, and money.</b>
       </div>
       <div class="position-item" data-n="02">
-        Most AI hides its resource cost. <b>Aethernet shows it.</b>
+        We tell you when <b>AI is the wrong tool for the job.</b>
       </div>
       <div class="position-item" data-n="03">
-        Most AI pushes cloud dependence. Aethernet <b>prefers local</b>.
+        We default to local. <b>Cloud is a choice you make on purpose.</b>
       </div>
       <div class="position-item" data-n="04">
-        Most AI pretends to be the best answer. Aethernet tells you <b>when it isn't</b>.
+        We don't change behind your back. <b>Updates are signed, scheduled, and visible.</b>
       </div>
     </aside>
   </section>
@@ -893,15 +1061,15 @@ footer{
   <div class="stats fade-in" aria-label="Key figures">
     <div class="stat">
       <div class="num"><em>4</em></div>
-      <div class="desc">routing modes — local, cloud, search, offline</div>
+      <div class="desc">routing modes — local, search, cloud, offline</div>
     </div>
     <div class="stat">
       <div class="num"><em>0</em></div>
-      <div class="desc">surveillance. steward is not a data‑collection device</div>
+      <div class="desc">surveillance — never a data‑collection device</div>
     </div>
     <div class="stat">
-      <div class="num"><em>∞</em></div>
-      <div class="desc">privacy. personal data stays local by default</div>
+      <div class="num"><em>~0.4g</em></div>
+      <div class="desc">CO₂e per local request — about 1% of a cloud query</div>
     </div>
     <div class="stat">
       <div class="num"><em>1</em></div>
@@ -995,8 +1163,11 @@ footer{
         </div>
 
         <div class="compute-foot">
-          <span>Estimates · informed use, not guilt</span>
+          <span>Responsible compute score</span>
           <span class="ts" id="compute-ts">—</span>
+        </div>
+        <div class="compute-foot">
+          <span>Today: you used less energy than a microwave minute.</span>
         </div>
       </div>
     </div>
@@ -1011,6 +1182,8 @@ footer{
       </div>
       <div class="aside">An honest model knows what it isn't for.</div>
     </div>
+
+    <p class="guidance-kicker fade-in">This is the part most AI products won't do.</p>
 
     <div class="guide fade-in">
       <div class="ai">
@@ -1045,39 +1218,20 @@ footer{
         <div class="num">§ 02b — Who it's for</div>
         <h2 style="margin-top:6px">Built for real life, not enterprise scale.</h2>
       </div>
-      <div class="aside">Six communities that deserve better AI.</div>
+      <div class="aside">Households and small businesses first. The roadmap stays bigger.</div>
     </div>
     <div class="cases fade-in">
       <div class="case-item">
         <div class="case-label">01 · Households</div>
-        <h4>Families</h4>
-        <p>Private planning, homework, documents, safe search guidance. Your home, your data.</p>
+        <h4>People who actually think about this</h4>
+        <p>Consumers who already drive a Prius or Tesla, wear a Whoop or Oura, shop the farmers' market, use DuckDuckGo, and repair their Patagonia instead of replacing it. AI built to the same standard as everything else they buy.</p>
       </div>
       <div class="case-item">
-        <div class="case-label">02 · Commerce</div>
-        <h4>Small businesses</h4>
-        <p>Operations, writing, customer service, research — at a cost that makes sense.</p>
+        <div class="case-label">02 · Small business</div>
+        <h4>Teams that take privacy seriously</h4>
+        <p>Independent practices, family-run operations, and boutique studios. People whose clients trust them not to leak their data into someone else's training set.</p>
       </div>
-      <div class="case-item">
-        <div class="case-label">03 · Creative</div>
-        <h4>Artists & studios</h4>
-        <p>Private archive, image cataloging, writing support, project planning.</p>
-      </div>
-      <div class="case-item">
-        <div class="case-label">04 · Education</div>
-        <h4>Schools & libraries</h4>
-        <p>Transparent AI with offline packs, education bundles, and reduced cloud exposure.</p>
-      </div>
-      <div class="case-item">
-        <div class="case-label">05 · Connectivity</div>
-        <h4>Rural communities</h4>
-        <p>AI that works with intermittent connectivity and slow, signed update cycles.</p>
-      </div>
-      <div class="case-item">
-        <div class="case-label">06 · Resilience</div>
-        <h4>Emergency use</h4>
-        <p>Offline knowledge packs, local maps, public safety, medical basics, civic updates.</p>
-      </div>
+      <div class="case-note">Eventually: schools, libraries, rural communities, emergency response. Right now: the households and small businesses that already care.</div>
     </div>
   </section>
 
@@ -1228,23 +1382,23 @@ footer{
     <div class="principles fade-in">
       <div class="principle">
         <div class="p-num">01</div>
-        <h4>Privacy first</h4>
-        <p>Personal data stays local whenever possible. Cloud use is optional, visible, and justified.</p>
+        <h4>Appropriate use first</h4>
+        <p>AI when AI helps. Something simpler when it doesn't.</p>
       </div>
       <div class="principle">
         <div class="p-num">02</div>
-        <h4>Low‑energy by default</h4>
-        <p>The system prefers lightweight local answers unless the user needs deeper reasoning.</p>
+        <h4>Transparent compute</h4>
+        <p>You see where every request went, what it cost, and why.</p>
       </div>
       <div class="principle">
         <div class="p-num">03</div>
-        <h4>Transparent compute</h4>
-        <p>The interface shows whether a request used local AI, cloud AI, search, or high‑compute reasoning.</p>
+        <h4>Private by default</h4>
+        <p>Personal data stays local. Cloud is opt-in and visible.</p>
       </div>
       <div class="principle">
         <div class="p-num">04</div>
-        <h4>Search when search is better</h4>
-        <p>Aethernet tells you when Google, a website, or a direct database is more appropriate than AI.</p>
+        <h4>Low-impact by design</h4>
+        <p>Slow updates, local-first inference, signed bundles, and audit logs.</p>
       </div>
     </div>
   </section>
@@ -1255,9 +1409,10 @@ footer{
       <div>
         <div class="footer-brand">Aethernet</div>
         <div class="footer-desc">
-          Responsible AI infrastructure for ordinary people,<br>
-          small businesses, schools, studios, families, and communities.
+          Responsible AI for households and small businesses that take this seriously.
+          A B Corp in formation.
         </div>
+        <div class="footer-badge">B Corp in formation</div>
         <div class="footer-links">
           <a href="about.html">About</a>
           <a href="product.html">Steward</a>
@@ -1273,14 +1428,53 @@ footer{
       </nav>
     </div>
     <div class="footer-copy">
-      <span>Aethernet · Privacy‑first · Low‑energy · Transparent</span>
-      <span>v0.1 · prototype · placeholder data</span>
+      <span>Aethernet · Responsible · Local-first · Transparent</span>
+      <span>v0.2 · positioning revision · placeholder data</span>
     </div>
   </footer>
 
 </div><!-- /wrap -->
 
 <script>
+/* ------- splash search bar ------- */
+(function(){
+  const sq    = document.getElementById('splash-q');
+  const sbadge= document.getElementById('splash-badge');
+  const stext = document.getElementById('splash-text');
+  const sbtn  = document.getElementById('splash-btn');
+
+  function splashRec(){
+    const r = classify(sq.value);
+    sbadge.className = 'badge ' + r.cls;
+    sbadge.textContent = r.label;
+    stext.textContent  = r.text;
+  }
+
+  sq.addEventListener('input', ()=>{
+    sq.style.height = 'auto';
+    sq.style.height = Math.max(38, sq.scrollHeight) + 'px';
+    splashRec();
+  });
+
+  sq.addEventListener('keydown', e=>{
+    if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sbtn.click(); }
+  });
+
+  sbtn.addEventListener('click', ()=>{
+    const val = sq.value.trim();
+    if (!val){ sq.focus(); return; }
+    // copy query to console input and scroll there
+    const qMain = document.getElementById('q');
+    if(qMain){
+      qMain.value = val;
+      qMain.style.height = 'auto';
+      qMain.style.height = Math.max(110, qMain.scrollHeight) + 'px';
+      updateRec();
+    }
+    document.getElementById('console').scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+})();
+
 /* ------- scroll progress bar ------- */
 const progressBar = document.getElementById('progress');
 window.addEventListener('scroll', ()=>{
