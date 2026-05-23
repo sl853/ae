@@ -604,6 +604,10 @@ section + section{border-top:1px solid var(--hair)}
   color:var(--ink-soft);font-family:var(--sans);font-size:13px;line-height:1.4;
 }
 .handoff-list b{color:var(--ink);font-weight:500}
+.handoff-list a{
+  color:var(--sky);border-bottom:1px solid rgba(58,94,115,.25);
+}
+.handoff-list a:hover{border-color:var(--sky)}
 .handoff-code{
   display:block;padding:10px;border:1px solid var(--hair);
   border-radius:var(--r);background:var(--paper);
@@ -613,6 +617,22 @@ section + section{border-top:1px solid var(--hair)}
 .quiet-receipt{
   margin-top:2px;font-family:var(--mono);font-size:10px;
   letter-spacing:.06em;text-transform:uppercase;color:var(--ink-mute);
+}
+.feedback{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  padding-top:10px;border-top:1px dashed var(--hair);
+}
+.feedback span{
+  font-family:var(--mono);font-size:10px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-mute);
+}
+.feedback button{
+  width:28px;height:28px;border:1px solid var(--hair);
+  border-radius:50%;display:grid;place-items:center;
+  font-size:14px;color:var(--ink-soft);
+}
+.feedback button:hover,.feedback button[aria-pressed="true"]{
+  border-color:var(--hair-strong);background:var(--paper);
 }
 .examples{
   display:grid;grid-template-columns:repeat(2,1fr);
@@ -1219,6 +1239,10 @@ footer{
             <div class="router-label">Answer</div>
             <div class="router-value result" id="routeResult"><span class="muted">No route executed yet.</span></div>
           </div>
+          <div class="router-row quiet">
+            <div class="router-label">Backend</div>
+            <div class="router-value" id="backendStatus">Checking local router...</div>
+          </div>
         </div>
 
         <div class="examples" aria-label="Example routing requests">
@@ -1294,7 +1318,7 @@ footer{
         </div>
 
         <div class="compute-foot">
-          <span>Responsible compute score</span>
+          <span><a href="METHODOLOGY.md">Responsible compute score</a></span>
           <span class="ts" id="compute-ts">—</span>
         </div>
         <div class="compute-foot">
@@ -1559,6 +1583,7 @@ footer{
           <a href="product.html">Steward</a>
           <a href="manifesto.md">Manifesto</a>
           <a href="roadmap.md">Roadmap</a>
+          <a href="METHODOLOGY.md">Methodology</a>
         </div>
       </div>
       <nav class="footer-nav" aria-label="Footer navigation">
@@ -1708,6 +1733,7 @@ const routeDecision = document.getElementById('routeDecision');
 const routeWhy = document.getElementById('routeWhy');
 const routeNext = document.getElementById('routeNext');
 const routeResult = document.getElementById('routeResult');
+const backendStatus = document.getElementById('backendStatus');
 
 function selectMode(mode){
   modeBtns.forEach(x=>x.setAttribute('aria-pressed', x.dataset.mode === mode ? 'true' : 'false'));
@@ -1867,7 +1893,107 @@ function renderHandoff(title, meta, items, code){
       '<div class="handoff-meta">' + escapeHtml(meta) + '</div>' +
       '<ul class="handoff-list">' + items.map(item => '<li>' + item + '</li>').join('') + '</ul>' +
       (code ? '<code class="handoff-code">' + escapeHtml(code) + '</code>' : '') +
+      renderFeedback() +
     '</div>';
+}
+
+function renderFeedback(){
+  return '<div class="feedback" aria-label="Answer feedback">' +
+    '<span>Did this help?</span>' +
+    '<button data-feedback="up" aria-label="This helped">+</button>' +
+    '<button data-feedback="down" aria-label="This did not help">-</button>' +
+  '</div>';
+}
+
+function wireFeedback(route, text){
+  routeResult.querySelectorAll('[data-feedback]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const record = {
+        route,
+        feedback:btn.dataset.feedback,
+        query:text,
+        at:new Date().toISOString()
+      };
+      const existing = JSON.parse(localStorage.getItem('tilth_feedback') || '[]');
+      existing.push(record);
+      localStorage.setItem('tilth_feedback', JSON.stringify(existing.slice(-100)));
+      routeResult.querySelectorAll('[data-feedback]').forEach(x=>x.setAttribute('aria-pressed','false'));
+      btn.setAttribute('aria-pressed','true');
+    });
+  });
+}
+
+function sourceItems(sources){
+  if (!sources || !sources.length) return ['No source links returned.'];
+  return sources.slice(0, 5).map(source =>
+    '<a href="' + escapeHtml(source.url || '#') + '" target="_blank" rel="noopener noreferrer">' +
+    escapeHtml(source.title || source.url || 'Source') + '</a><br>' +
+    escapeHtml(source.snippet || '')
+  );
+}
+
+async function fetchSearchAnswer(text, receipt){
+  if (!location.protocol.startsWith('http')){
+    renderHandoff(
+      'Open through the local server to search.',
+      'Search unavailable from file view',
+      [
+        'Run <b>npm start</b>, then open <b>http://127.0.0.1:4180</b>.',
+        '<span class="quiet-receipt">' + escapeHtml(receiptLine(receipt)) + '</span>'
+      ],
+      ''
+    );
+    wireFeedback('search', text);
+    return;
+  }
+
+  routeResult.innerHTML = '<span class="muted">Searching...</span>';
+  try{
+    const res = await fetch('/search?q=' + encodeURIComponent(text), { headers:{ 'Accept':'application/json' } });
+    if (!res.ok) throw new Error('Search connector returned ' + res.status);
+    const data = await res.json();
+    const provider = data.receipt?.provider || data.meta?.provider || 'search';
+    renderHandoff(
+      data.answer || 'No direct answer found.',
+      provider,
+      [
+        ...sourceItems(data.sources),
+        '<span class="quiet-receipt">' + escapeHtml(receiptLine({
+          route:'search',
+          impact:data.receipt?.impact || receipt.impact,
+          confidence:data.receipt?.confidence || receipt.confidence
+        })) + '</span>'
+      ],
+      ''
+    );
+    wireFeedback('search', text);
+  }catch(e){
+    renderHandoff(
+      'I cannot reach search yet.',
+      'Search route selected',
+      [
+        'Check the local server, or add <b>BRAVE_SEARCH_API_KEY</b> for full web results.',
+        '<span class="quiet-receipt">Error: ' + escapeHtml(e.message) + ' · ' + escapeHtml(receiptLine(receipt)) + '</span>'
+      ],
+      ''
+    );
+    wireFeedback('search', text);
+  }
+}
+
+async function checkBackend(){
+  if (!location.protocol.startsWith('http')){
+    backendStatus.textContent = 'Static file view. Run npm start for search and offline connectors.';
+    return;
+  }
+  try{
+    const res = await fetch('/health', { headers:{ 'Accept':'application/json' } });
+    if (!res.ok) throw new Error('Health check returned ' + res.status);
+    const data = await res.json();
+    backendStatus.textContent = 'Local router online. Search: ' + data.connectors.search_provider + '. Offline packs: ' + (data.connectors.offline ? 'ready' : 'off') + '.';
+  }catch(e){
+    backendStatus.textContent = 'Static shell only. Start the local backend for search and offline answers.';
+  }
 }
 
 async function fetchOfflinePack(text, receipt){
@@ -1881,6 +2007,7 @@ async function fetchOfflinePack(text, receipt){
       ],
       ''
     );
+    wireFeedback('offline', text);
     return;
   }
 
@@ -1901,6 +2028,7 @@ async function fetchOfflinePack(text, receipt){
       ],
       ''
     );
+    wireFeedback('offline', text);
   }catch(e){
     renderHandoff(
       'I cannot reach the offline pack yet.',
@@ -1911,6 +2039,7 @@ async function fetchOfflinePack(text, receipt){
       ],
       ''
     );
+    wireFeedback('offline', text);
   }
 }
 
@@ -1927,21 +2056,13 @@ function renderResult(r, text){
         '<div class="handoff-title">' + escapeHtml(calc.answer) + '</div>' +
         '<div class="handoff-meta">Calculated locally</div>' +
         '<div class="quiet-receipt">Expression: ' + escapeHtml(calc.expression) + ' · ' + escapeHtml(receiptLine(receipt)) + '</div>' +
+        renderFeedback() +
       '</div>';
+    wireFeedback('none', text);
     return;
   }
   if (r.mode === 'search'){
-    const query = compactQuery(text);
-    renderHandoff(
-      'I would search for this.',
-      'Search connector not connected yet',
-      [
-        'Search query: <b>' + escapeHtml(query || text) + '</b>',
-        'I would use official pages, primary records, or recent reporting first.',
-        '<span class="quiet-receipt">' + escapeHtml(receiptLine(receipt)) + '</span>'
-      ],
-      ''
-    );
+    fetchSearchAnswer(compactQuery(text) || text, receipt);
     return;
   }
   if (r.mode === 'cloud'){
@@ -1954,6 +2075,7 @@ function renderResult(r, text){
       ],
       ''
     );
+    wireFeedback('cloud', text);
     return;
   }
   if (r.mode === 'offline'){
@@ -1970,6 +2092,7 @@ function renderResult(r, text){
       ],
       ''
     );
+    wireFeedback('local', text);
     return;
   }
   routeResult.innerHTML =
@@ -2020,6 +2143,7 @@ function tick(){
 }
 tick(); setInterval(tick, 1000);
 setCompute('local');
+checkBackend();
 
 /* ------- generate speaker grill dots ------- */
 (function(){

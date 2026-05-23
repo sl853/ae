@@ -4,6 +4,7 @@
   "private": true,
   "description": "Local Tilth router prototype with offline knowledge pack lookup.",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "check": "node --check server.js"
   }
 }

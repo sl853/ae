@@ -4,6 +4,7 @@ const path = require('path');
 
 const root = __dirname;
 const port = Number(process.env.PORT || 4180);
+const startedAt = new Date();
 
 const mimeTypes = {
   '.html': 'text/html; charset=utf-8',
@@ -17,6 +18,22 @@ const mimeTypes = {
 function sendJson(res, status, payload) {
   res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' });
   res.end(JSON.stringify(payload, null, 2));
+}
+
+function answerPayload({ route, answer, sources = [], receipt = {}, meta = {} }) {
+  return {
+    route,
+    answer,
+    sources,
+    receipt: {
+      route,
+      confidence: receipt.confidence || 'medium',
+      impact: receipt.impact || 'estimated',
+      measured: receipt.measured || false,
+      ...receipt
+    },
+    meta
+  };
 }
 
 function classify(text) {
@@ -133,6 +150,177 @@ function searchOffline(query) {
   };
 }
 
+function flattenDuckTopics(topics, out = []) {
+  for (const topic of topics || []) {
+    if (topic.Text && topic.FirstURL) out.push({ title: topic.Text.split(' - ')[0], url: topic.FirstURL, snippet: topic.Text });
+    if (topic.Topics) flattenDuckTopics(topic.Topics, out);
+  }
+  return out;
+}
+
+function stripHtml(value) {
+  return String(value || '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#x27;/g, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function decodeDuckUrl(value) {
+  const raw = stripHtml(value);
+  try {
+    const parsed = new URL(raw, 'https://duckduckgo.com');
+    const uddg = parsed.searchParams.get('uddg');
+    return uddg ? decodeURIComponent(uddg) : parsed.href;
+  } catch {
+    return raw;
+  }
+}
+
+async function searchDuckDuckGoHtml(query) {
+  const url = new URL('https://html.duckduckgo.com/html/');
+  url.searchParams.set('q', query);
+
+  const started = Date.now();
+  const response = await fetch(url, {
+    headers: {
+      'Accept': 'text/html',
+      'User-Agent': 'TilthPrototype/0.1 (+https://sl853.github.io/ae/)'
+    }
+  });
+  if (!response.ok) throw new Error(`DuckDuckGo HTML returned ${response.status}`);
+  const html = await response.text();
+  const blocks = html.match(/<div class="result[\s\S]*?<\/div>\s*<\/div>/g) || [];
+  const sources = [];
+
+  for (const block of blocks) {
+    const link = block.match(/<a[^>]+class="result__a"[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/);
+    if (!link) continue;
+    const snippet = block.match(/<a[^>]+class="result__snippet"[\s\S]*?>([\s\S]*?)<\/a>|<div[^>]+class="result__snippet"[\s\S]*?>([\s\S]*?)<\/div>/);
+    sources.push({
+      title: stripHtml(link[2]),
+      url: decodeDuckUrl(link[1]),
+      snippet: stripHtml(snippet?.[1] || snippet?.[2] || '')
+    });
+    if (sources.length >= 5) break;
+  }
+
+  return answerPayload({
+    route: 'search',
+    answer: sources.length ? sources[0].snippet || sources[0].title : 'I found no strong web results for that.',
+    sources,
+    receipt: {
+      confidence: sources.length ? 'medium' : 'low',
+      impact: 'web search estimate',
+      measured: false,
+      provider: 'DuckDuckGo HTML fallback',
+      duration_ms: Date.now() - started
+    },
+    meta: { provider: 'duckduckgo-html-fallback', query, prototype_fallback: true }
+  });
+}
+
+async function searchWithBrave(query) {
+  const key = process.env.BRAVE_SEARCH_API_KEY;
+  if (!key) return null;
+
+  const url = new URL('https://api.search.brave.com/res/v1/web/search');
+  url.searchParams.set('q', query);
+  url.searchParams.set('count', '5');
+  url.searchParams.set('text_decorations', 'false');
+  url.searchParams.set('safesearch', 'moderate');
+
+  const started = Date.now();
+  const response = await fetch(url, {
+    headers: {
+      'Accept': 'application/json',
+      'X-Subscription-Token': key
+    }
+  });
+  if (!response.ok) throw new Error(`Brave Search returned ${response.status}`);
+  const data = await response.json();
+  const results = (data.web?.results || []).slice(0, 5).map(result => ({
+    title: result.title,
+    url: result.url,
+    snippet: result.description || ''
+  }));
+
+  return answerPayload({
+    route: 'search',
+    answer: results.length ? results[0].snippet || results[0].title : 'I found no strong web results for that.',
+    sources: results,
+    receipt: {
+      confidence: results.length ? 'medium-high' : 'low',
+      impact: 'web search estimate',
+      measured: false,
+      provider: 'Brave Search',
+      duration_ms: Date.now() - started
+    },
+    meta: { provider: 'brave', query }
+  });
+}
+
+async function searchWithDuckDuckGo(query) {
+  const url = new URL('https://api.duckduckgo.com/');
+  url.searchParams.set('q', query);
+  url.searchParams.set('format', 'json');
+  url.searchParams.set('no_html', '1');
+  url.searchParams.set('skip_disambig', '1');
+
+  const started = Date.now();
+  const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
+  if (!response.ok) throw new Error(`DuckDuckGo returned ${response.status}`);
+  const data = await response.json();
+  const related = flattenDuckTopics(data.RelatedTopics).slice(0, 5);
+  const sources = [];
+  if (data.AbstractURL && data.AbstractText) {
+    sources.push({ title: data.Heading || query, url: data.AbstractURL, snippet: data.AbstractText });
+  }
+  sources.push(...related);
+
+  const answer = data.Answer || data.AbstractText || data.Definition || (sources.length ? sources[0].snippet : 'I could not find a direct instant answer. Add a Brave Search API key for full web results.');
+
+  if (!sources.length && !data.Answer && !data.AbstractText && !data.Definition) {
+    return searchDuckDuckGoHtml(query);
+  }
+
+  return answerPayload({
+    route: 'search',
+    answer,
+    sources: sources.slice(0, 5),
+    receipt: {
+      confidence: sources.length || data.Answer ? 'medium' : 'low',
+      impact: 'instant-answer estimate',
+      measured: false,
+      provider: 'DuckDuckGo Instant Answer',
+      duration_ms: Date.now() - started
+    },
+    meta: { provider: 'duckduckgo-instant-answer', query, full_web_search: false }
+  });
+}
+
+async function searchWeb(query) {
+  const trimmed = String(query || '').trim();
+  if (!trimmed) {
+    return answerPayload({
+      route: 'search',
+      answer: 'Type a search query first.',
+      sources: [],
+      receipt: { confidence: 'low', impact: 'none', measured: true },
+      meta: { provider: 'none' }
+    });
+  }
+
+  const brave = await searchWithBrave(trimmed);
+  if (brave) return brave;
+  return searchWithDuckDuckGo(trimmed);
+}
+
 function serveStatic(req, res) {
   let urlPath;
   try {
@@ -162,20 +350,51 @@ function serveStatic(req, res) {
   });
 }
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
 
-  if (url.pathname === '/route') {
-    sendJson(res, 200, classify(url.searchParams.get('q') || ''));
-    return;
-  }
+  try {
+    if (url.pathname === '/route') {
+      sendJson(res, 200, classify(url.searchParams.get('q') || ''));
+      return;
+    }
 
-  if (url.pathname === '/offline') {
-    sendJson(res, 200, searchOffline(url.searchParams.get('q') || ''));
-    return;
-  }
+    if (url.pathname === '/health') {
+      sendJson(res, 200, {
+        ok: true,
+        name: 'tilth-router-prototype',
+        version: '0.1.0',
+        started_at: startedAt.toISOString(),
+        uptime_seconds: Math.round(process.uptime()),
+        connectors: {
+          route: true,
+          search: true,
+          search_provider: process.env.BRAVE_SEARCH_API_KEY ? 'brave' : 'duckduckgo-fallback',
+          offline: true,
+          local_ai: false,
+          cloud_ai: false
+        }
+      });
+      return;
+    }
 
-  serveStatic(req, res);
+    if (url.pathname === '/search') {
+      sendJson(res, 200, await searchWeb(url.searchParams.get('q') || ''));
+      return;
+    }
+
+    if (url.pathname === '/offline') {
+      sendJson(res, 200, searchOffline(url.searchParams.get('q') || ''));
+      return;
+    }
+
+    serveStatic(req, res);
+  } catch (error) {
+    sendJson(res, 500, {
+      error: error.message,
+      route: url.pathname.replace('/', '') || 'static'
+    });
+  }
 });
 
 server.listen(port, '127.0.0.1', () => {
