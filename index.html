@@ -475,6 +475,7 @@ section + section{border-top:1px solid var(--hair)}
 .recommend .badge.s{background:var(--sky-soft);color:var(--sky);border-color:rgba(58,94,115,.3)}
 .recommend .badge.o{background:var(--ochre-soft);color:var(--ochre);border-color:rgba(168,119,43,.3)}
 .recommend .badge.r{background:var(--rust-soft);color:var(--rust);border-color:rgba(154,63,34,.3)}
+.recommend .badge.n{background:var(--paper-2);color:var(--ink-soft);border-color:var(--hair-strong)}
 .recommend .text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
 .submit{
   font-family:var(--mono);font-size:11px;letter-spacing:.12em;
@@ -491,7 +492,7 @@ section + section{border-top:1px solid var(--hair)}
 .modes{
   margin-top:20px;
   display:grid;
-  grid-template-columns:repeat(4,1fr);
+  grid-template-columns:repeat(5,1fr);
   gap:10px;
 }
 .mode{
@@ -536,6 +537,40 @@ section + section{border-top:1px solid var(--hair)}
 .mode .mode-sub{
   font-size:12px;color:var(--ink-soft);line-height:1.45;
 }
+.router-card{
+  margin-top:14px;
+  background:var(--surface);
+  border:1px solid var(--hair);
+  border-radius:var(--r);
+  overflow:hidden;
+}
+.router-row{
+  display:grid;
+  grid-template-columns:118px 1fr;
+  border-top:1px solid var(--hair);
+}
+.router-row:first-child{border-top:0}
+.router-label{
+  font-family:var(--mono);font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-mute);
+  padding:13px 14px;border-right:1px solid var(--hair);
+}
+.router-value{
+  padding:12px 14px;
+  font-size:13px;color:var(--ink-soft);line-height:1.45;
+}
+.router-value b{color:var(--ink);font-weight:500}
+.examples{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:8px;margin-top:14px;
+}
+.example{
+  text-align:left;background:transparent;
+  border:1px solid var(--hair);border-radius:var(--r);
+  padding:10px 12px;font-size:12.5px;color:var(--ink-soft);
+  line-height:1.35;transition:border-color var(--transition), background var(--transition), transform var(--transition);
+}
+.example:hover{border-color:var(--hair-strong);background:rgba(247,243,232,.62);transform:translateY(-1px)}
 
 /* ------- responsible compute panel ------- */
 .compute{
@@ -937,6 +972,10 @@ footer{
 @media(max-width:640px){
   .wrap{padding:0 20px}
   .modes{grid-template-columns:1fr}
+  .examples{grid-template-columns:1fr}
+  .router-row{grid-template-columns:1fr}
+  .router-label{border-right:0;border-bottom:1px solid var(--hair);padding-bottom:8px}
+  .router-value{padding-top:10px}
   .update-list{grid-template-columns:1fr}
   .mast nav{display:none}
   .meter{grid-template-columns:80px 1fr auto}
@@ -963,7 +1002,7 @@ footer{
     <div class="right">
       <span id="ts">— · —</span>
       <span class="sep">·</span>
-      <span>v0.1 PROTOTYPE</span>
+      <span>v0.3 ROUTER PROTOTYPE</span>
     </div>
   </div>
 </div>
@@ -1105,7 +1144,34 @@ footer{
           </div>
         </div>
 
+        <div class="router-card" aria-live="polite">
+          <div class="router-row">
+            <div class="router-label">Decision</div>
+            <div class="router-value" id="routeDecision"><b>Ready.</b> Type a request to see the route before compute is spent.</div>
+          </div>
+          <div class="router-row">
+            <div class="router-label">Why</div>
+            <div class="router-value" id="routeWhy">Tilth starts with rules, then uses a small classifier for edge cases. No custom LLM required.</div>
+          </div>
+          <div class="router-row">
+            <div class="router-label">Next</div>
+            <div class="router-value" id="routeNext">For v0, this is a working routing simulation. The same contract becomes the backend API later.</div>
+          </div>
+        </div>
+
+        <div class="examples" aria-label="Example routing requests">
+          <button class="example" data-example="What is 18% of 240?">Calculator, no AI</button>
+          <button class="example" data-example="What's the weather in Los Angeles tomorrow?">Current fact, search</button>
+          <button class="example" data-example="Rewrite this client email so it sounds calm and clear.">Private writing, local</button>
+          <button class="example" data-example="Compare three pricing models for a responsible AI app.">Hard reasoning, cloud</button>
+        </div>
+
         <div class="modes" role="radiogroup" aria-label="Routing mode">
+          <button class="mode" role="radio" aria-pressed="false" data-mode="none">
+            <div class="mode-label"><span>00 · Best</span><span class="mode-dot" aria-hidden="true"></span></div>
+            <div class="mode-name">No AI</div>
+            <div class="mode-sub">Use math, rules, or a direct tool. Fastest, cheapest, cleanest.</div>
+          </button>
           <button class="mode" role="radio" aria-pressed="true" data-mode="local">
             <div class="mode-label"><span>01 · Default</span><span class="mode-dot" aria-hidden="true"></span></div>
             <div class="mode-name">Local AI</div>
@@ -1485,6 +1551,10 @@ window.addEventListener('scroll', ()=>{
 
 /* ------- compute presets per mode ------- */
 const presets = {
+  none:    {
+    tag:'No model · direct tool',
+    privacy:["none","No sharing"],     energy:["none","None"],   water:["none","None"],    carbon:["none","≈ 0.0 g CO₂e"]
+  },
   local:   {
     tag:'Local mode · private',
     privacy:["low","Private"],        energy:["low","Low"],    water:["low","Low"],     carbon:["low","≈ 0.4 g CO₂e"]
@@ -1549,27 +1619,102 @@ q.addEventListener('input', ()=>{
 /* ------- live recommendation ------- */
 const recBadge = document.getElementById('recBadge');
 const recText  = document.getElementById('recText');
+const routeDecision = document.getElementById('routeDecision');
+const routeWhy = document.getElementById('routeWhy');
+const routeNext = document.getElementById('routeNext');
+
+function selectMode(mode){
+  modeBtns.forEach(x=>x.setAttribute('aria-pressed', x.dataset.mode === mode ? 'true' : 'false'));
+  setCompute(mode);
+}
 
 function classify(text){
   const t = (text || '').toLowerCase().trim();
-  if (!t) return { cls:'', label:'Ready', text:'Type a question. Tilth will suggest where it should be answered.' };
+  if (!t) return {
+    mode:'local',
+    cls:'',
+    label:'Ready',
+    text:'Type a question. Tilth will suggest where it should be answered.',
+    decision:'Ready.',
+    why:'Tilth checks whether the request needs a model, search, cloud reasoning, an offline pack, or no AI at all.',
+    next:'The first product is the router. Model training comes later, if the routing data proves it is worth it.'
+  };
 
   if (/\b(today|tonight|tomorrow|right now|currently|weather|forecast|news|headlines|score|stock|price|exchange rate|open(ing)? hours|when does|when is|address of|directions|near me|menu|showtimes)\b/.test(t) || /\$[\d,]+/.test(t))
-    return { cls:'s', label:'Use search', text:'A web page will be more accurate than a model right now.' };
+    return {
+      mode:'search',
+      cls:'s',
+      label:'Use search',
+      text:'A web page will be more accurate than a model right now.',
+      decision:'Search is the right route.',
+      why:'This depends on current or source-specific information. A model would be guessing from stale memory.',
+      next:'Open search, show sources, and use AI only to summarize after the source is visible.'
+    };
 
   if (/^[\d\s.,+\-*/x×÷=()%]+$/.test(t) || /\b(convert|in (km|miles|kg|lbs|°c|°f|usd|eur|gbp)|how many .* in)\b/.test(t))
-    return { cls:'', label:'Local is enough', text:'This is a calculator‑grade question. Local answer recommended.' };
+    return {
+      mode:'none',
+      cls:'n',
+      label:'No AI needed',
+      text:'This is a direct-tool question. No model recommended.',
+      decision:'No AI is the best route.',
+      why:'The answer is deterministic. A calculator or rule beats a probabilistic model.',
+      next:'Run the direct tool locally and spend zero model compute.'
+    };
 
   if (/\b(strategy|business plan|analyze deeply|long[- ]?term|compare options|trade[- ]?offs?|root cause|architect|design system|legal analysis|tax strategy|financial model|risk assessment|investment|acquisition)\b/.test(t))
-    return { cls:'r', label:'Deep reasoning', text:'Higher‑compute mode recommended. Cloud handoff will be visible.' };
+    return {
+      mode:'cloud',
+      cls:'r',
+      label:'Deep reasoning',
+      text:'Higher-compute mode recommended. Cloud handoff will be visible.',
+      decision:'Cloud AI may be justified.',
+      why:'This asks for synthesis, tradeoffs, or planning that may exceed a small local model.',
+      next:'Ask for approval, show cost and privacy impact, then route to a cloud model if the user agrees.'
+    };
 
   if (/\b(write|draft|rewrite|summari[sz]e|outline|explain|brainstorm|name (ideas|suggestions)|translate|polish|edit|tone|email|letter|plan|recipe|story|poem|caption|help me|how do i)\b/.test(t))
-    return { cls:'', label:'AI is useful', text:'Shape work — local AI should handle this well.' };
+    return {
+      mode:'local',
+      cls:'',
+      label:'Local AI',
+      text:'Shape work — local AI should handle this well.',
+      decision:'Local AI is the right first route.',
+      why:'This is drafting, rewriting, or shaping. It does not need the open web by default.',
+      next:'Keep the request on the device. Escalate only if the user asks for stronger reasoning.'
+    };
 
   if (/\b(who is|what is the|where is|wikipedia|biography|company|founded|ceo of|population of|capital of|definition of)\b/.test(t))
-    return { cls:'s', label:'Use search', text:'Names and numbers — go to the source.' };
+    return {
+      mode:'search',
+      cls:'s',
+      label:'Use search',
+      text:'Names and numbers — go to the source.',
+      decision:'Search is safer than model memory.',
+      why:'The request wants a factual lookup. Tilth should retrieve, cite, then summarize.',
+      next:'Fetch source pages first. Use AI only after the facts are grounded.'
+    };
 
-  return { cls:'o', label:'Worth a try', text:'Tilth will start local and only escalate if needed.' };
+  if (/\b(emergency|first aid|offline|power outage|earthquake|wildfire|hurricane|evacuation|library pack|knowledge pack|manual|stored locally)\b/.test(t))
+    return {
+      mode:'offline',
+      cls:'o',
+      label:'Offline pack',
+      text:'Use a signed local pack before reaching for the cloud.',
+      decision:'Offline knowledge should be checked first.',
+      why:'This looks like durable reference information that can live in a signed bundle.',
+      next:'Search the local pack, show bundle date and source, then offer web verification if connected.'
+    };
+
+  return {
+    mode:'local',
+    cls:'o',
+    label:'Start local',
+    text:'Tilth will start local and only escalate if needed.',
+    decision:'Start local, then reassess.',
+    why:'No strong signal says this needs the web or cloud. The responsible default is local first.',
+    next:'Try the local model. If confidence is low, ask before search or cloud escalation.'
+  };
 }
 
 function updateRec(){
@@ -1577,8 +1722,22 @@ function updateRec(){
   recBadge.className = 'badge ' + r.cls;
   recBadge.textContent = r.label;
   recText.textContent  = r.text;
+  routeDecision.innerHTML = '<b>' + r.decision + '</b> ' + r.text;
+  routeWhy.textContent = r.why;
+  routeNext.textContent = r.next;
+  selectMode(r.mode);
 }
 q.addEventListener('input', updateRec);
+
+document.querySelectorAll('.example').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    q.value = b.dataset.example;
+    q.style.height = 'auto';
+    q.style.height = Math.max(110, q.scrollHeight) + 'px';
+    updateRec();
+    q.focus();
+  });
+});
 
 /* ------- submit ------- */
 document.getElementById('submit').addEventListener('click', ()=>{
