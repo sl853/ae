@@ -1,4 +1,4 @@
-# Aethernet Manifesto
+# Tilth Manifesto
 ### AI for the rest of us.
 
 ---
@@ -10,7 +10,7 @@
 
 ## Project
 
-**Company:** Aethernet  
+**Company:** Tilth  
 **Product:** Steward — the local AI appliance  
 **Positioning:** AI for the rest of us.
 
@@ -18,7 +18,7 @@
 
 ## Core idea
 
-Aethernet is responsible AI infrastructure for ordinary people, small businesses, schools, studios, families, and communities. It is designed around privacy, lower energy use, transparent resource impact, slower update rhythms, and the principle that AI should not be used when a simpler tool is better.
+Tilth is responsible AI infrastructure for ordinary people, small businesses, schools, studios, families, and communities. It is designed around privacy, lower energy use, transparent resource impact, slower update rhythms, and the principle that AI should not be used when a simpler tool is better.
 
 ---
 
@@ -40,7 +40,7 @@ People are being pushed toward AI for everything, even when a normal web search,
 
 Build an AI system that is honest about its own use.
 
-Aethernet should help people decide:
+Tilth should help people decide:
 - When to use AI
 - When to use search
 - When to use a local model
@@ -73,7 +73,7 @@ Users should see estimated environmental impact in simple terms: low, medium, hi
 The system should tell users when Google, a normal website, or a direct database is more appropriate than AI.
 
 ### Slow update mode
-Many users do not need constant model updates. Aethernet should offer weekly, monthly, or low-frequency signed update bundles to reduce waste and bandwidth.
+Many users do not need constant model updates. Tilth should offer weekly, monthly, or low-frequency signed update bundles to reduce waste and bandwidth.
 
 ### Offline-first resilience
 The system should work without constant internet dependence. Local knowledge packs, signed updates, and one-way update systems should make AI more resilient.
@@ -123,9 +123,9 @@ The app should show:
 
 ---
 
-## Aethernet infrastructure layer
+## Tilth infrastructure layer
 
-Aethernet can eventually become a one-way or low-bandwidth distribution network for responsible AI updates:
+Tilth can eventually become a one-way or low-bandwidth distribution network for responsible AI updates:
 
 - Signed model patches
 - Knowledge packs
@@ -158,7 +158,7 @@ Steward is the local AI appliance. It should be:
 
 ## What makes this different
 
-| Conventional AI | Aethernet |
+| Conventional AI | Tilth |
 |---|---|
 | Optimizes for more usage | Optimizes for appropriate usage |
 | Hides resource cost | Shows resource cost |
@@ -172,14 +172,14 @@ Steward is the local AI appliance. It should be:
 
 ## Simple product sentence
 
-Aethernet is a privacy-first, low-energy AI system that helps people use AI only when it makes sense.
+Tilth is a privacy-first, low-energy AI system that helps people use AI only when it makes sense.
 
 ---
 
 ## Founder thesis
 
-The next major AI opportunity is not simply bigger models. It is trust, restraint, privacy, and responsible infrastructure. People need AI that fits real life, not just enterprise scale or Silicon Valley acceleration. Aethernet is AI for people who want intelligence without surrendering privacy, money, attention, or environmental responsibility.
+The next major AI opportunity is not simply bigger models. It is trust, restraint, privacy, and responsible infrastructure. People need AI that fits real life, not just enterprise scale or Silicon Valley acceleration. Tilth is AI for people who want intelligence without surrendering privacy, money, attention, or environmental responsibility.
 
 ---
 
-*Aethernet · v0.1 · 2026*
+*Tilth · v0.1 · 2026*

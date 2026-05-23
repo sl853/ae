@@ -1,4 +1,4 @@
-# Aethernet Product Roadmap
+# Tilth Product Roadmap
 ### v0.1 → v0.3 — Working document
 
 ---
@@ -14,7 +14,7 @@
 The goal of v0.1 is to prove the concept, establish the design language, and validate the core thesis: that people will respond to an AI product built around restraint and honesty.
 
 ### Deliverables
-- [x] Single-page HTML prototype (aethernet.html)
+- [x] Single-page HTML prototype (index.html)
 - [x] Responsible Compute panel with live mode switching
 - [x] Intent classifier — routes to local, search, cloud, or offline
 - [x] Slow update settings UI
@@ -57,7 +57,7 @@ The goal of v0.2 is to build a real working version of the console — with actu
 - [ ] Settings — update cadence, cloud opt-in, audit log viewer
 
 **Content & community**
-- [ ] Aethernet website — publicly accessible (GitHub Pages or similar)
+- [ ] Tilth website — publicly accessible (GitHub Pages or similar)
 - [ ] Waitlist for Steward hardware concept
 - [ ] First public writing on the "appropriate use" thesis
 
@@ -65,7 +65,7 @@ The goal of v0.2 is to build a real working version of the console — with actu
 - A user can ask a question and receive a real answer routed by the classifier
 - The routing decision is always visible and overridable
 - Offline mode works without internet for common tasks
-- At least one external person calls Aethernet "the only AI that tells me when not to use AI"
+- At least one external person calls Tilth "the only AI that tells me when not to use AI"
 
 ---
 
@@ -85,7 +85,7 @@ The goal of v0.3 is to produce a working Steward hardware prototype — a physic
 - [ ] USB sideload port — for offline bundle installation
 
 **Software**
-- [ ] Steward OS — lightweight Linux-based system with Aethernet console built in
+- [ ] Steward OS — lightweight Linux-based system with Tilth console built in
 - [ ] Local archive — private document store, searchable without cloud
 - [ ] Knowledge pack system — swappable domain packs (medical basics, education, civic)
 - [ ] OTA update system — signed weekly bundles, verified before install
@@ -93,7 +93,7 @@ The goal of v0.3 is to produce a working Steward hardware prototype — a physic
 - [ ] Web interface — browser-based console accessible from devices on local network
 
 **Distribution**
-- [ ] Aethernet update network — first version of low-bandwidth signed bundle distribution
+- [ ] Tilth update network — first version of low-bandwidth signed bundle distribution
 - [ ] First hardware batch — limited run for pilot users (families, studios, one school)
 - [ ] Education pack — first curriculum-aligned knowledge bundle for schools
 
@@ -113,10 +113,10 @@ The goal of v0.3 is to produce a working Steward hardware prototype — a physic
 
 ## Beyond v0.3 — Long-term vision
 
-- **Aethernet network** — a one-way distribution network for signed AI bundles, knowledge packs, and civic information; designed for low bandwidth and intermittent connectivity
+- **Tilth network** — a one-way distribution network for signed AI bundles, knowledge packs, and civic information; designed for low bandwidth and intermittent connectivity
 - **Emergency resilience packs** — offline-first knowledge for natural disaster response, local public safety, and community coordination
 - **Steward One Pro** — version for clinics, small businesses, and schools with larger local storage and multi-user audit log
-- **Open bundle format** — allow third parties to create and sign knowledge packs for the Aethernet network
+- **Open bundle format** — allow third parties to create and sign knowledge packs for the Tilth network
 - **Rural connectivity program** — partnership with libraries, community centers, and municipal networks to distribute Steward at reduced cost
 
 ---
@@ -131,5 +131,5 @@ The goal of v0.3 is to produce a working Steward hardware prototype — a physic
 
 ---
 
-*Aethernet · Roadmap v0.1 · 2026*  
+*Tilth · Roadmap v0.1 · 2026*  
 *This document is a working draft. All timelines and specifications are estimates.*

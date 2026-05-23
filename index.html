@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Aethernet — AI for the rest of us</title>
+<title>Tilth — AI for the rest of us</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -955,7 +955,7 @@ footer{
 <!-- top status strip -->
 <div class="status">
   <div class="wrap row">
-    <span><span class="dot"></span>AETHERNET · OPERATIONAL</span>
+    <span><span class="dot"></span>TILTH · OPERATIONAL</span>
     <span class="sep">·</span>
     <span>NODE STEWARD‑LOCAL</span>
     <span class="sep">·</span>
@@ -974,7 +974,7 @@ footer{
   <header class="mast">
     <div class="brand">
       <span class="glyph" aria-hidden="true"></span>
-      <span>Aethernet</span>
+      <span>Tilth</span>
     </div>
     <nav aria-label="Primary navigation">
       <a href="#console">Console</a>
@@ -986,22 +986,22 @@ footer{
   </header>
 
   <!-- splash: search-first viewport -->
-  <section class="splash" aria-label="Ask Aethernet">
+  <section class="splash" aria-label="Ask Tilth">
     <div class="splash-inner">
       <div class="splash-logo" aria-hidden="true">
         <span class="glyph-sm"></span>
-        Aethernet
+        Tilth
       </div>
       <div class="splash-tag">Better AI, used deliberately.</div>
 
       <div class="splash-box">
         <textarea id="splash-q" class="splash-q" rows="1"
           placeholder="What do you actually need to know?"
-          aria-label="Ask Aethernet"></textarea>
+          aria-label="Ask Tilth"></textarea>
         <div class="splash-foot">
           <div class="splash-rec" id="splash-rec" aria-live="polite">
             <span class="badge" id="splash-badge">Ready</span>
-            <span class="splash-rec-text" id="splash-text">Type a question — Aethernet will suggest where to answer it.</span>
+            <span class="splash-rec-text" id="splash-text">Type a question — Tilth will suggest where to answer it.</span>
           </div>
           <button class="splash-btn" id="splash-btn" aria-label="Route this question">Route →</button>
         </div>
@@ -1092,14 +1092,14 @@ footer{
       <div>
         <div class="input-card">
           <div class="input-head">
-            <span>Aethernet · Input</span>
+            <span>Tilth · Input</span>
             <span class="live"><span class="d" aria-hidden="true"></span>LISTENING — LOCAL</span>
           </div>
           <textarea id="q" class="q-input" rows="4" placeholder="What do you actually need to know?" aria-label="Your question"></textarea>
           <div class="input-foot">
             <div class="recommend" id="rec" aria-live="polite">
               <span class="badge" id="recBadge">Ready</span>
-              <span class="text" id="recText">Type a question. Aethernet will suggest where it should be answered.</span>
+              <span class="text" id="recText">Type a question. Tilth will suggest where it should be answered.</span>
             </div>
             <button class="submit" id="submit" aria-label="Route request">Route →</button>
           </div>
@@ -1407,7 +1407,7 @@ footer{
   <footer>
     <div class="footer-inner">
       <div>
-        <div class="footer-brand">Aethernet</div>
+        <div class="footer-brand">Tilth</div>
         <div class="footer-desc">
           Responsible AI for households and small businesses that take this seriously.
           A B Corp in formation.
@@ -1428,7 +1428,7 @@ footer{
       </nav>
     </div>
     <div class="footer-copy">
-      <span>Aethernet · Responsible · Local-first · Transparent</span>
+      <span>Tilth · Responsible · Local-first · Transparent</span>
       <span>v0.2 · positioning revision · placeholder data</span>
     </div>
   </footer>
@@ -1552,7 +1552,7 @@ const recText  = document.getElementById('recText');
 
 function classify(text){
   const t = (text || '').toLowerCase().trim();
-  if (!t) return { cls:'', label:'Ready', text:'Type a question. Aethernet will suggest where it should be answered.' };
+  if (!t) return { cls:'', label:'Ready', text:'Type a question. Tilth will suggest where it should be answered.' };
 
   if (/\b(today|tonight|tomorrow|right now|currently|weather|forecast|news|headlines|score|stock|price|exchange rate|open(ing)? hours|when does|when is|address of|directions|near me|menu|showtimes)\b/.test(t) || /\$[\d,]+/.test(t))
     return { cls:'s', label:'Use search', text:'A web page will be more accurate than a model right now.' };
@@ -1569,7 +1569,7 @@ function classify(text){
   if (/\b(who is|what is the|where is|wikipedia|biography|company|founded|ceo of|population of|capital of|definition of)\b/.test(t))
     return { cls:'s', label:'Use search', text:'Names and numbers — go to the source.' };
 
-  return { cls:'o', label:'Worth a try', text:'Aethernet will start local and only escalate if needed.' };
+  return { cls:'o', label:'Worth a try', text:'Tilth will start local and only escalate if needed.' };
 }
 
 function updateRec(){
