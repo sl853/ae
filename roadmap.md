@@ -17,6 +17,8 @@ The goal of v0.1 is to prove the concept, establish the design language, and val
 - [x] Single-page HTML prototype (index.html)
 - [x] Responsible Compute panel with live mode switching
 - [x] Intent classifier — routes to local, search, cloud, or offline
+- [x] Router spec — documented route schema and connector plan (ROUTER_SPEC.md)
+- [x] No AI route — local calculator execution with route receipt
 - [x] Slow update settings UI
 - [x] Steward device concept illustration
 - [x] Multi-page website (index, product, about)
@@ -40,7 +42,8 @@ The goal of v0.2 is to build a real working version of the console — with actu
 
 **Core functionality**
 - [ ] Local inference engine — quantized 7B model running on-device
-- [ ] Real intent classifier — replaces regex prototype with a lightweight classifier model
+- [ ] Real router API — implements ROUTER_SPEC.md as a backend contract
+- [ ] Real intent classifier — upgrades regex prototype with a lightweight classifier when correction data exists
 - [ ] Live routing — actual requests routed to local AI, search API, or cloud AI based on classification
 - [ ] Real compute metrics — actual energy and time measurement per request (carbon/water remain estimates)
 - [ ] Audit log — local JSON log of every request, routing decision, and response
