@@ -102,7 +102,7 @@ body::before{
   border-bottom:1px solid var(--hair);
   background:rgba(241,236,223,.85);
   backdrop-filter:saturate(120%) blur(8px);
-  position:sticky;top:0;z-index:50;
+  position:relative;z-index:2;
 }
 .status .row{
   display:flex;align-items:center;gap:18px;
@@ -305,47 +305,6 @@ body::before{
   50%{transform:translateX(-50%) translateY(5px)}
 }
 
-/* ------- hero ------- */
-.hero{
-  display:block;
-  padding:70px 0 82px;
-  border-bottom:1px solid var(--hair);
-}
-.hero h1{
-  font-family:var(--display);
-  font-weight:400;
-  font-size: clamp(58px, 7.5vw, 108px);
-  line-height:.94;
-  letter-spacing:-.025em;
-  margin:0 0 28px;
-}
-.hero h1.position-title{
-  font-size:clamp(34px,4vw,54px);
-  line-height:1;
-  letter-spacing:-.015em;
-}
-.hero h1 em{
-  font-style:italic;
-  color:var(--moss);
-}
-.hero .lede{
-  font-family:var(--display);
-  font-style:italic;
-  font-size:22px;
-  line-height:1.42;
-  color:var(--ink-soft);
-  max-width:58ch;
-  margin:0 0 32px;
-}
-.hero .meta{
-  font-family:var(--mono);font-size:11px;
-  letter-spacing:.08em;text-transform:uppercase;
-  color:var(--ink-mute);
-}
-.hero .actions{
-  display:flex;align-items:center;gap:16px;
-  margin-top:30px;flex-wrap:wrap;
-}
 .btn-primary{
   font-family:var(--mono);font-size:11px;letter-spacing:.12em;
   text-transform:uppercase;
@@ -367,31 +326,6 @@ body::before{
   transition:border-color var(--transition), color var(--transition);
 }
 .btn-ghost:hover{ border-color:var(--ink); color:var(--ink) }
-
-/* ------- stats strip ------- */
-.stats{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  border-bottom:1px solid var(--hair);
-}
-.stat{
-  padding:28px 24px;
-  border-right:1px solid var(--hair);
-}
-.stat:last-child{ border-right:0 }
-.stat .num{
-  font-family:var(--display);
-  font-size:clamp(40px,4vw,56px);
-  line-height:1;
-  letter-spacing:-.02em;
-  margin-bottom:8px;
-}
-.stat .num em{ font-style:italic; color:var(--moss) }
-.stat .desc{
-  font-family:var(--mono);font-size:11px;letter-spacing:.08em;
-  text-transform:uppercase;color:var(--ink-mute);
-  line-height:1.5;
-}
 
 /* ------- section structure ------- */
 section{padding:72px 0}
@@ -862,65 +796,6 @@ section + section{border-top:1px solid var(--hair)}
   background:rgba(247,243,232,.48);
 }
 
-/* ------- update settings ------- */
-.updates{
-  display:grid;
-  grid-template-columns:1fr 1.4fr;
-  gap:48px;
-  align-items:start;
-}
-.updates .intro p{
-  font-family:var(--display);font-style:italic;
-  font-size:22px;line-height:1.4;color:var(--ink-soft);
-  margin:0 0 18px;max-width:34ch;
-}
-.updates .intro .note{
-  font-family:var(--mono);font-size:11px;letter-spacing:.06em;
-  color:var(--ink-mute);text-transform:uppercase;
-  border-top:1px solid var(--hair);padding-top:14px;margin-top:18px;
-  max-width:34ch;line-height:1.6;
-}
-.update-list{
-  display:grid;grid-template-columns:1fr 1fr;gap:12px;
-}
-.update-option{
-  text-align:left;
-  background:var(--surface);
-  border:1px solid var(--hair);
-  border-radius:var(--r);
-  padding:18px 18px 16px;
-  transition:border-color var(--transition), background var(--transition), transform var(--transition);
-  position:relative;
-  display:flex;flex-direction:column;gap:6px;
-  cursor:pointer;
-}
-.update-option:hover{
-  border-color:var(--hair-strong);
-  transform:translateY(-1px);
-}
-.update-option[aria-pressed="true"]{
-  border-color:var(--ink);
-  background:#1a1812;color:var(--paper);
-  transform:none;
-}
-.update-option[aria-pressed="true"] .uo-tag,
-.update-option[aria-pressed="true"] .uo-sub{color:rgba(241,236,223,.65)}
-.uo-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.uo-tag{
-  font-family:var(--mono);font-size:10px;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--ink-mute);
-}
-.uo-name{font-family:var(--display);font-size:20px;line-height:1.1;letter-spacing:-.005em}
-.uo-sub{font-size:13px;color:var(--ink-soft);line-height:1.4}
-.uo-check{
-  width:14px;height:14px;border:1px solid var(--hair-strong);border-radius:50%;
-  flex:none;position:relative;transition:border-color var(--transition);
-}
-.update-option[aria-pressed="true"] .uo-check{border-color:rgba(241,236,223,.5)}
-.update-option[aria-pressed="true"] .uo-check::after{
-  content:"";position:absolute;inset:3px;border-radius:50%;background:var(--paper);
-}
-
 /* ------- steward ------- */
 .steward{
   display:grid;
@@ -1079,8 +954,6 @@ footer{
 
 /* ------- responsive ------- */
 @media(max-width:1080px){
-  .stats{grid-template-columns:repeat(2,1fr)}
-  .stat{border-bottom:1px solid var(--hair)}
   .principles{grid-template-columns:repeat(2,1fr)}
   .principle:nth-child(2){ border-right:0 }
   .principle:nth-child(n+3){ border-top:1px solid var(--hair) }
@@ -1088,7 +961,7 @@ footer{
 @media(max-width:980px){
   .splash{min-height:calc(100svh - 100px);padding:58px 0 72px}
   .splash-inner{max-width:100%}
-  .hero{grid-template-columns:1fr;gap:32px;padding:56px 0 60px}
+  .status .right{display:none}
   .console{grid-template-columns:1fr}
   .compute{position:static}
   .modes{grid-template-columns:1fr 1fr}
@@ -1103,8 +976,6 @@ footer{
   .case-item{border-right:1px solid var(--hair);border-bottom:1px solid var(--hair)}
   .case-item:nth-child(2n){border-right:0}
   .case-item:last-child{border-bottom:0}
-  .updates{grid-template-columns:1fr;gap:28px}
-  .update-list{grid-template-columns:1fr 1fr}
   .steward{grid-template-columns:1fr;gap:28px}
   .steward .copy ul{grid-template-columns:1fr}
   .footer-inner{grid-template-columns:1fr}
@@ -1131,10 +1002,8 @@ footer{
   .router-row{grid-template-columns:1fr}
   .router-label{border-right:0;border-bottom:1px solid var(--hair);padding-bottom:8px}
   .router-value{padding-top:10px}
-  .update-list{grid-template-columns:1fr}
   .mast nav{display:none}
   .meter{grid-template-columns:80px 1fr auto}
-  .stats{grid-template-columns:1fr 1fr}
   .principles{grid-template-columns:1fr}
   .principle{ border-right:0; border-bottom:1px solid var(--hair) }
   .principle:last-child{ border-bottom:0 }
@@ -1171,9 +1040,9 @@ footer{
       <span>Tilth</span>
     </div>
     <nav aria-label="Primary navigation">
-      <a href="#console">Console</a>
-      <a href="#guidance">Guidance</a>
-      <a href="#updates">Updates</a>
+      <a href="#console">Demo</a>
+      <a href="#guidance">Handles</a>
+      <a href="#routing">Routing</a>
       <a href="#steward">Steward</a>
     </nav>
     <a href="about.html" class="nav-cta">About →</a>
@@ -1186,8 +1055,8 @@ footer{
         <span class="glyph-sm"></span>
         Tilth
       </div>
-      <h1 class="splash-headline">Local AI for the <em>rest</em> of us.</h1>
-      <p class="splash-sub">It stays in the house. The cloud is there when it has to be.</p>
+      <h1 class="splash-headline">Local AI for the rest of us.</h1>
+      <p class="splash-sub">Type a question. Tilth chooses the right path: search, local AI, offline packs, or cloud with permission.</p>
       <div class="splash-tag">Better AI, used deliberately.</div>
 
       <div class="splash-box">
@@ -1197,7 +1066,7 @@ footer{
         <div class="splash-foot">
           <div class="splash-rec" id="splash-rec" aria-live="polite">
             <span class="badge" id="splash-badge">Ready</span>
-            <span class="splash-rec-text" id="splash-text">Ask normally. Tilth handles the route.</span>
+            <span class="splash-rec-text" id="splash-text">Tilth chooses the path.</span>
           </div>
           <button class="splash-btn" id="splash-btn" aria-label="Ask Tilth">Ask →</button>
         </div>
@@ -1227,8 +1096,8 @@ footer{
       </div>
     </div>
 
-    <a href="#about" class="splash-scroll" aria-label="Scroll to learn more">
-      <span>Explore</span>
+    <a href="#console" class="splash-scroll" aria-label="Scroll to demo details">
+      <span>Demo</span>
       <svg width="10" height="14" viewBox="0 0 10 14" fill="none" aria-hidden="true">
         <path d="M5 1v12M1 8l4 4 4-4" stroke="currentColor" stroke-width="1.2"
           stroke-linecap="round" stroke-linejoin="round"/>
@@ -1236,49 +1105,14 @@ footer{
     </a>
   </section>
 
-  <!-- hero / about -->
-  <section class="hero" id="about" style="border-top:0;padding-top:68px" aria-labelledby="hero-heading">
-    <div>
-      <div class="meta reveal reveal-1" style="margin-bottom:20px">Position</div>
-      <p class="lede reveal reveal-2" id="hero-heading">
-        Tilth keeps the routing, cost, and privacy work in the background. You ask normally. It uses the simplest path that can answer well.
-      </p>
-      <div class="meta reveal reveal-3">Not more AI everywhere · Better AI, used deliberately</div>
-      <div class="actions reveal reveal-4">
-        <a href="#console" class="btn-primary">Try the console</a>
-        <a href="product.html" class="btn-ghost">Meet Steward</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- stats -->
-  <div class="stats fade-in" aria-label="Key figures">
-    <div class="stat">
-      <div class="num"><em>4</em></div>
-      <div class="desc">routing modes — local, search, cloud, offline</div>
-    </div>
-    <div class="stat">
-      <div class="num"><em>0</em></div>
-      <div class="desc">surveillance — never a data‑collection device</div>
-    </div>
-    <div class="stat">
-      <div class="num"><em>~0.4g</em></div>
-      <div class="desc">CO₂e per local request — about 1% of a cloud query</div>
-    </div>
-    <div class="stat">
-      <div class="num"><em>1</em></div>
-      <div class="desc">rule. AI only when AI is actually the right answer</div>
-    </div>
-  </div>
-
   <!-- console -->
   <section id="console" aria-labelledby="console-heading">
     <div class="section-head">
       <div>
-        <div class="num">§ 01 — Details</div>
-        <h2 id="console-heading" style="margin-top:6px">What happened under the answer.</h2>
+        <div class="num">§ 01 — Working demo</div>
+        <h2 id="console-heading" style="margin-top:6px">One box. One answer. A quiet receipt.</h2>
       </div>
-      <div class="aside">Most people never need this. It is here because trust should be inspectable.</div>
+      <div class="aside">The backend chooses the route. The user gets the answer.</div>
     </div>
 
     <div class="console">
@@ -1293,7 +1127,7 @@ footer{
           <div class="input-foot">
             <div class="recommend" id="rec" aria-live="polite">
               <span class="badge" id="recBadge">Ready</span>
-              <span class="text" id="recText">Type a question. Tilth will answer if it can, then show a quiet receipt.</span>
+            <span class="text" id="recText">Tilth will answer if it can, then show a quiet receipt.</span>
             </div>
             <button class="submit" id="submit" aria-label="Ask Tilth">Ask →</button>
           </div>
@@ -1418,84 +1252,16 @@ footer{
     </div>
   </section>
 
-  <!-- guidance -->
+  <!-- handles -->
   <section id="guidance" aria-labelledby="guidance-heading">
     <div class="section-head">
       <div>
-        <div class="num">§ 02 — Guidance</div>
-        <h2 id="guidance-heading" style="margin-top:6px">When AI helps · when a simpler tool wins.</h2>
-      </div>
-      <div class="aside">An honest model knows what it isn't for.</div>
-    </div>
-
-    <p class="guidance-kicker fade-in">This is the part most AI products won't do.</p>
-
-    <div class="guide fade-in">
-      <div class="ai">
-        <h3>
-          <small>Use AI when</small>
-          The task is shape, not fact.
-        </h3>
-        <ul>
-          <li data-n="01"><span><b>Drafting & summarizing.</b> Long emails, meeting notes, a first pass at a letter or a plan.</span></li>
-          <li data-n="02"><span><b>Translating shape.</b> Turning bullet points into prose, prose into a checklist, one tone into another.</span></li>
-          <li data-n="03"><span><b>Thinking through a decision.</b> Listing trade‑offs, pressure‑testing a plan, naming what's missing.</span></li>
-          <li data-n="04"><span><b>Reorganizing what you already have.</b> Your notes, your files, your archive — restructured, not invented.</span></li>
-        </ul>
-      </div>
-      <div class="search">
-        <h3>
-          <small>Use search instead when</small>
-          The task is fact, not shape.
-        </h3>
-        <ul>
-          <li data-n="01"><span><b>Today's anything.</b> Prices, weather, news, scores, opening hours. Models guess; pages know.</span></li>
-          <li data-n="02"><span><b>Public records & primary sources.</b> Laws, datasets, official forms. Go to the source, not its echo.</span></li>
-          <li data-n="03"><span><b>Specific people, places, and products.</b> Where the name and the number have to be exactly right.</span></li>
-          <li data-n="04"><span><b>Anything you'd want to cite.</b> If the link matters, the link is the answer.</span></li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- use cases -->
-    <div class="section-head fade-in" style="margin-top:56px">
-      <div>
-        <div class="num">§ 02b — Who it's for</div>
-        <h2 style="margin-top:6px">Built for homes and small rooms.</h2>
-      </div>
-      <div class="aside">For people who would rather not think about AI all day.</div>
-    </div>
-    <div class="cases fade-in">
-      <div class="case-item">
-        <div class="case-label">01 · Home</div>
-        <h4>For the family</h4>
-        <p>For the family that doesn't want their kids' homework training somebody else's AI.</p>
-      </div>
-      <div class="case-item">
-        <div class="case-label">02 · Practice</div>
-        <h4>For the doctor's office</h4>
-        <p>For the small practice that needs AI but can't put patient notes in the cloud.</p>
-      </div>
-      <div class="case-item">
-        <div class="case-label">03 · Main street</div>
-        <h4>For the bookshop, café, and corner studio</h4>
-        <p>Small operations whose values should run through their tools.</p>
-      </div>
-      <div class="case-item">
-        <div class="case-label">04 · House</div>
-        <h4>For people who just want calmer defaults</h4>
-        <p>One decision up front. Better defaults after that.</p>
-      </div>
-      <div class="case-note">Eventually: schools, libraries, rural communities, emergency response. Right now: the households and small businesses that already feel uneasy about where AI is going.</div>
-    </div>
-
-    <div class="section-head fade-in" style="margin-top:56px">
-      <div>
-        <div class="num">§ 02c — Everyday layer</div>
-        <h2 style="margin-top:6px">The things Tilth should actually handle.</h2>
+        <div class="num">§ 02 — Handles</div>
+        <h2 id="guidance-heading" style="margin-top:6px">The ordinary things Tilth should actually handle.</h2>
       </div>
       <div class="aside">Useful tools first. Engagement loops last.</div>
     </div>
+
     <div class="needs-grid fade-in">
       <div class="need-card">
         <div class="case-label">Search</div>
@@ -1550,42 +1316,42 @@ footer{
     </div>
   </section>
 
-  <!-- updates -->
-  <section id="updates" aria-labelledby="updates-heading">
+  <!-- routing -->
+  <section id="routing" aria-labelledby="routing-heading">
     <div class="section-head">
       <div>
-        <div class="num">§ 03 — Update cadence</div>
-        <h2 id="updates-heading" style="margin-top:6px">Slow updates by default.</h2>
+        <div class="num">§ 03 — Routing</div>
+        <h2 id="routing-heading" style="margin-top:6px">How Tilth chooses.</h2>
       </div>
-      <div class="aside">Bandwidth is a resource. So is your attention.</div>
+      <div class="aside">No model unless a model is the right tool.</div>
     </div>
 
-    <div class="updates fade-in">
-      <div class="intro">
-        <p>Most users don't need a smarter model every week. Choose a rhythm that fits your bandwidth, your hardware, and your nerves.</p>
-        <div class="note">Updates are signed bundles. Verify before you install. No silent changes, ever.</div>
+    <p class="guidance-kicker fade-in">This is the part most AI products won't do.</p>
+
+    <div class="guide fade-in">
+      <div class="ai">
+        <h3>
+          <small>Use AI when</small>
+          The task is shape, not fact.
+        </h3>
+        <ul>
+          <li data-n="01"><span><b>Drafting & summarizing.</b> Long emails, meeting notes, a first pass at a letter or a plan.</span></li>
+          <li data-n="02"><span><b>Translating shape.</b> Turning bullet points into prose, prose into a checklist, one tone into another.</span></li>
+          <li data-n="03"><span><b>Thinking through a decision.</b> Listing trade‑offs, pressure‑testing a plan, naming what's missing.</span></li>
+          <li data-n="04"><span><b>Reorganizing what you already have.</b> Your notes, your files, your archive — restructured, not invented.</span></li>
+        </ul>
       </div>
-      <div class="update-list" role="radiogroup" aria-label="Update cadence">
-        <button class="update-option" role="radio" aria-pressed="false" data-update="fast">
-          <div class="uo-head"><div class="uo-tag">A · Fast</div><div class="uo-check" aria-hidden="true"></div></div>
-          <div class="uo-name">Continuous</div>
-          <div class="uo-sub">Latest model and knowledge as soon as a signed bundle ships.</div>
-        </button>
-        <button class="update-option" role="radio" aria-pressed="true" data-update="weekly">
-          <div class="uo-head"><div class="uo-tag">B · Recommended</div><div class="uo-check" aria-hidden="true"></div></div>
-          <div class="uo-name">Weekly bundle</div>
-          <div class="uo-sub">One quiet update each week. Most people pick this.</div>
-        </button>
-        <button class="update-option" role="radio" aria-pressed="false" data-update="monthly">
-          <div class="uo-head"><div class="uo-tag">C · Monthly</div><div class="uo-check" aria-hidden="true"></div></div>
-          <div class="uo-name">Monthly bundle</div>
-          <div class="uo-sub">For low‑bandwidth or low‑churn environments.</div>
-        </button>
-        <button class="update-option" role="radio" aria-pressed="false" data-update="manual">
-          <div class="uo-head"><div class="uo-tag">D · Manual</div><div class="uo-check" aria-hidden="true"></div></div>
-          <div class="uo-name">Manual / offline</div>
-          <div class="uo-sub">You decide. Sideload signed bundles from USB or the network.</div>
-        </button>
+      <div class="search">
+        <h3>
+          <small>Use search instead when</small>
+          The task is fact, not shape.
+        </h3>
+        <ul>
+          <li data-n="01"><span><b>Today's anything.</b> Prices, weather, news, scores, opening hours. Models guess; pages know.</span></li>
+          <li data-n="02"><span><b>Public records & primary sources.</b> Laws, datasets, official forms. Go to the source, not its echo.</span></li>
+          <li data-n="03"><span><b>Specific people, places, and products.</b> Where the name and the number have to be exactly right.</span></li>
+          <li data-n="04"><span><b>Anything you'd want to cite.</b> If the link matters, the link is the answer.</span></li>
+        </ul>
       </div>
     </div>
   </section>
@@ -1594,24 +1360,24 @@ footer{
   <section id="steward" aria-labelledby="steward-heading">
     <div class="section-head">
       <div>
-        <div class="num">§ 04 — Device</div>
+        <div class="num">§ 04 — Desktop and device</div>
         <h2 id="steward-heading" style="margin-top:6px">Steward.</h2>
       </div>
-      <div class="aside">The local intelligence layer. Not a surveillance assistant.</div>
+      <div class="aside">The local layer that makes files, photos, offline answers, and private routing real.</div>
     </div>
 
     <div class="steward fade-in">
       <div class="copy">
-        <div class="kicker">A trusted local appliance</div>
-        <h2 style="font-size:clamp(36px,4.6vw,58px);margin-bottom:18px">A quieter machine in the corner of the room.</h2>
-        <p>Steward holds your model, your archive, and your update bundles locally. It connects to the cloud only when it announces it's about to — and only for what you asked.</p>
-        <p>Designed for households, studios, classrooms, clinics, and small operations who want intelligence without surrendering their data, their bandwidth, or their evenings.</p>
+        <div class="kicker">Desktop app first, Steward next</div>
+        <h2 style="font-size:clamp(36px,4.6vw,58px);margin-bottom:18px">The website proves the route. The app makes it useful.</h2>
+        <p>The web demo can route, search, and show receipts. The desktop app is where local files, photos, calendars, offline packs, and local models become real.</p>
+        <p>Steward is the home appliance version: a quiet local node that holds models and bundles, then connects to cloud only when the request actually calls for it.</p>
         <ul aria-label="Steward features">
-          <li>Local‑first inference</li>
+          <li>Desktop app for files and photos</li>
           <li>Signed update bundles</li>
           <li>Offline knowledge packs</li>
           <li>Visible cloud handoff</li>
-          <li>Low‑power idle</li>
+          <li>Local model runtime</li>
           <li>Open audit log</li>
         </ul>
       </div>
@@ -1737,9 +1503,9 @@ footer{
         </div>
       </div>
       <nav class="footer-nav" aria-label="Footer navigation">
-        <a href="#console">Console</a>
-        <a href="#guidance">Guidance</a>
-        <a href="#updates">Updates</a>
+        <a href="#console">Demo</a>
+        <a href="#guidance">Handles</a>
+        <a href="#routing">Routing</a>
         <a href="#steward">Steward</a>
       </nav>
     </div>
@@ -1879,14 +1645,6 @@ advancedToggle.addEventListener('click', ()=>{
   advancedToggle.setAttribute('aria-expanded', String(!expanded));
   advancedPanel.hidden = expanded;
   routerCard.classList.toggle('show-details', !expanded);
-});
-
-/* ------- update selection ------- */
-document.querySelectorAll('.update-option').forEach(b=>{
-  b.addEventListener('click', ()=>{
-    document.querySelectorAll('.update-option').forEach(x=>x.setAttribute('aria-pressed','false'));
-    b.setAttribute('aria-pressed','true');
-  });
 });
 
 /* ------- textarea auto-resize ------- */
@@ -2146,6 +1904,66 @@ function sourceItems(sources){
   );
 }
 
+function receiptFromBackend(data, fallback){
+  const receipt = data.receipt || {};
+  return {
+    route:receipt.route || data.route || fallback.route,
+    impact:receipt.estimates?.carbon || receipt.impact || fallback.impact,
+    confidence:receipt.confidence || fallback.confidence
+  };
+}
+
+async function fetchAnswer(text, receipt, target = routeResult){
+  if (!location.protocol.startsWith('http')){
+    renderHandoff(
+      'Open through the local server to answer.',
+      'Backend unavailable from file view',
+      [
+        'Run <b>npm start</b>, then open <b>http://127.0.0.1:4180</b>.',
+        '<span class="quiet-receipt">' + escapeHtml(receiptLine(receipt)) + '</span>'
+      ],
+      '',
+      target
+    );
+    wireFeedback(receipt.route, text, target);
+    return;
+  }
+
+  target.innerHTML = '<span class="muted">Answering...</span>';
+  try{
+    const res = await fetch('/answer?q=' + encodeURIComponent(text), { headers:{ 'Accept':'application/json' } });
+    if (!res.ok) throw new Error('Answer connector returned ' + res.status);
+    const data = await res.json();
+    const provider = data.receipt?.provider || data.meta?.provider || data.route || 'answer';
+    const layers = (data.receipt?.privacy_layers || []).length
+      ? 'Privacy: ' + data.receipt.privacy_layers.join(', ')
+      : 'Privacy: not reported';
+    renderHandoff(
+      data.answer || 'No direct answer returned.',
+      provider,
+      [
+        ...sourceItems(data.sources),
+        '<span class="quiet-receipt">' + escapeHtml(layers + ' · ' + receiptLine(receiptFromBackend(data, receipt))) + '</span>'
+      ],
+      '',
+      target
+    );
+    wireFeedback(data.route || receipt.route, text, target);
+  }catch(e){
+    renderHandoff(
+      'I cannot reach the answer backend yet.',
+      'Backend route selected',
+      [
+        'Check the local server. Search and offline can still be tested through their debug endpoints.',
+        '<span class="quiet-receipt">Error: ' + escapeHtml(e.message) + ' · ' + escapeHtml(receiptLine(receipt)) + '</span>'
+      ],
+      '',
+      target
+    );
+    wireFeedback(receipt.route, text, target);
+  }
+}
+
 async function fetchSearchAnswer(text, receipt, target = routeResult){
   if (!location.protocol.startsWith('http')){
     renderHandoff(
@@ -2207,7 +2025,7 @@ async function checkBackend(){
     const res = await fetch('/health', { headers:{ 'Accept':'application/json' } });
     if (!res.ok) throw new Error('Health check returned ' + res.status);
     const data = await res.json();
-    backendStatus.textContent = 'Local router online. Search: ' + data.connectors.search_provider + '. Offline packs: ' + (data.connectors.offline ? 'ready' : 'off') + '.';
+    backendStatus.textContent = 'Local router online. Answer: ' + (data.connectors.answer ? 'ready' : 'off') + '. Search: ' + data.connectors.search_provider + '. Offline packs: ' + (data.connectors.offline ? 'ready' : 'off') + '.';
   }catch(e){
     backendStatus.textContent = 'Static shell only. Start the local backend for search and offline answers.';
   }
@@ -2282,39 +2100,19 @@ function renderResult(r, text, target = routeResult){
     return;
   }
   if (r.mode === 'search'){
-    fetchSearchAnswer(compactQuery(text) || text, receipt, target);
+    fetchAnswer(text, receipt, target);
     return;
   }
   if (r.mode === 'cloud'){
-    renderHandoff(
-      'This needs stronger reasoning.',
-      'Cloud connector not connected yet',
-      [
-        'Before sending anything, Tilth would ask for approval and show provider, privacy, carbon, and estimated money cost.',
-        '<span class="quiet-receipt">' + escapeHtml(receiptLine(receipt)) + '</span>'
-      ],
-      '',
-      target
-    );
-    wireFeedback('cloud', text, target);
+    fetchAnswer(text, receipt, target);
     return;
   }
   if (r.mode === 'offline'){
-    fetchOfflinePack(text, receipt, target);
+    fetchAnswer(text, receipt, target);
     return;
   }
   if (r.mode === 'local'){
-    renderHandoff(
-      'I would answer this locally.',
-      'Local model connector not connected yet',
-      [
-        'This is the kind of request a small local model should handle without cloud handoff.',
-        '<span class="quiet-receipt">' + escapeHtml(receiptLine(receipt)) + '</span>'
-      ],
-      '',
-      target
-    );
-    wireFeedback('local', text, target);
+    fetchAnswer(text, receipt, target);
     return;
   }
   target.innerHTML =

@@ -36,6 +36,97 @@ function answerPayload({ route, answer, sources = [], receipt = {}, meta = {} })
   };
 }
 
+const privacyLayersByRoute = {
+  none: ['offline', 'device'],
+  local: ['offline', 'device'],
+  offline: ['offline', 'device'],
+  search: ['encrypted'],
+  cloud: ['encrypted']
+};
+
+const impactByRoute = {
+  none: { energy: 'none', water: 'none', carbon: '≈ 0.0 g CO₂e' },
+  local: { energy: 'low', water: 'low', carbon: '≈ 0.4 g CO₂e' },
+  offline: { energy: 'idle', water: 'none', carbon: '≈ 0.0 g CO₂e' },
+  search: { energy: 'low', water: 'low', carbon: '≈ 0.2 g CO₂e' },
+  cloud: { energy: 'high', water: 'high', carbon: '≈ 11 g CO₂e' }
+};
+
+const trustedHealthDomains = [
+  'medlineplus.gov',
+  'nih.gov',
+  'cdc.gov',
+  'fda.gov',
+  'nccih.nih.gov',
+  'nhs.uk',
+  'mayoclinic.org',
+  'clevelandclinic.org'
+];
+
+function sourceHost(source) {
+  try {
+    return new URL(source.url).hostname.replace(/^www\./, '').toLowerCase();
+  } catch {
+    return '';
+  }
+}
+
+function isTrustedHealthSource(source) {
+  const host = sourceHost(source);
+  return trustedHealthDomains.some(domain => host === domain || host.endsWith(`.${domain}`));
+}
+
+function withRouteReceipt(payload, classification, extra = {}) {
+  const route = payload.route || classification.route;
+  return {
+    ...payload,
+    classification,
+    receipt: {
+      route,
+      label: classification.label,
+      confidence: classification.confidence || payload.receipt?.confidence || 'medium',
+      requires_approval: classification.requires_approval,
+      measured: false,
+      privacy_layers: privacyLayersByRoute[route] || [],
+      estimates: impactByRoute[route] || { energy: 'estimated', water: 'estimated', carbon: 'estimated' },
+      ...payload.receipt,
+      ...extra
+    }
+  };
+}
+
+function cleanExpression(text) {
+  let expr = String(text || '').toLowerCase();
+  expr = expr.replace(/what is|what's|calculate|solve|equals?|please|answer/gi, ' ');
+  expr = expr.replace(/(\d+(?:\.\d+)?)\s*%\s+of\s+(\d+(?:\.\d+)?)/gi, '($1/100)*$2');
+  expr = expr.replace(/\bpercent of\b/g, '/100*');
+  expr = expr.replace(/\bplus\b/g, '+');
+  expr = expr.replace(/\bminus\b/g, '-');
+  expr = expr.replace(/\btimes\b|\bmultiplied by\b|×/g, '*');
+  expr = expr.replace(/\bdivided by\b|÷/g, '/');
+  expr = expr.replace(/x/g, '*');
+  expr = expr.replace(/,/g, '');
+  expr = expr.replace(/[^0-9+\-*/().%\s]/g, ' ');
+  expr = expr.replace(/%/g, '/100');
+  return expr.replace(/\s+/g, ' ').trim();
+}
+
+function tryLocalCalculation(text) {
+  const expr = cleanExpression(text);
+  if (!expr || !/[0-9]/.test(expr) || /[+\-*/]{2,}/.test(expr)) return null;
+  if (!/^[0-9+\-*/().\s]+$/.test(expr)) return null;
+  try {
+    const value = Function('"use strict"; return (' + expr + ')')();
+    if (typeof value !== 'number' || !Number.isFinite(value)) return null;
+    const answer = Math.abs(value) >= 1000
+      ? value.toLocaleString(undefined, { maximumFractionDigits: 6 })
+      : Number(value.toFixed(8)).toString();
+    return { expression: expr, answer };
+  } catch {
+    return null;
+  }
+}
+
 function classify(text) {
   const t = String(text || '').toLowerCase().trim();
   if (!t) {
@@ -381,6 +472,129 @@ async function searchWeb(query) {
   return searchWithDuckDuckGo(trimmed);
 }
 
+async function searchHealth(query) {
+  const enriched = `${query} medlineplus cdc nih fda`;
+  const raw = await searchWeb(enriched);
+  const trusted = (raw.sources || []).filter(isTrustedHealthSource);
+  const sources = trusted.length ? trusted : raw.sources;
+  const answer = trusted.length
+    ? (trusted[0].snippet || trusted[0].title)
+    : 'I found web results, but none were from the trusted health-source list yet. Treat this as a source-finding step, not medical advice.';
+
+  return answerPayload({
+    route: 'search',
+    answer,
+    sources,
+    receipt: {
+      ...raw.receipt,
+      provider: raw.receipt?.provider || raw.meta?.provider || 'search',
+      confidence: trusted.length ? 'medium-high' : 'low',
+      source_policy: 'trusted-health-first',
+      trusted_sources_found: trusted.length
+    },
+    meta: {
+      ...raw.meta,
+      original_query: query,
+      enriched_query: enriched,
+      trusted_health_domains: trustedHealthDomains
+    }
+  });
+}
+
+function offlineAnswer(query) {
+  const data = searchOffline(query);
+  const first = data.results[0];
+  return answerPayload({
+    route: 'offline',
+    answer: first ? first.body : 'No local offline-pack match found yet.',
+    sources: data.results.map(item => ({
+      title: item.title,
+      url: `offline://${data.pack.id}/${item.id || item.title}`,
+      snippet: item.body
+    })),
+    receipt: {
+      confidence: first ? 'medium-high' : 'low',
+      impact: 'offline pack lookup',
+      measured: true,
+      provider: data.pack.title,
+      pack_version: data.pack.version,
+      pack_signature: data.pack.signature,
+      pack_updated: data.pack.updated
+    },
+    meta: { pack: data.pack, query }
+  });
+}
+
+function localPlaceholder(query, classification) {
+  return answerPayload({
+    route: 'local',
+    answer: classification.label === 'Local tools'
+      ? 'This should stay local, but the desktop/mobile connectors for files, photos, calendar, and reminders are not connected yet.'
+      : 'This should be answered locally, but the local model connector is not connected yet.',
+    sources: [],
+    receipt: {
+      confidence: 'medium',
+      impact: 'local connector pending',
+      provider: 'local-placeholder'
+    },
+    meta: { query, connector_ready: false }
+  });
+}
+
+function cloudPlaceholder(query) {
+  return answerPayload({
+    route: 'cloud',
+    answer: 'This may need stronger cloud reasoning. Tilth would ask for approval before sending anything off device.',
+    sources: [],
+    receipt: {
+      confidence: 'medium-high',
+      impact: 'cloud estimate',
+      provider: 'cloud-placeholder',
+      approval_required: true
+    },
+    meta: { query, connector_ready: false }
+  });
+}
+
+async function answerQuery(query) {
+  const classification = classify(query);
+
+  if (classification.route === 'none') {
+    const calc = tryLocalCalculation(query);
+    const payload = answerPayload({
+      route: 'none',
+      answer: calc ? calc.answer : 'This is a direct-tool request, but the exact local tool is not connected yet.',
+      sources: [],
+      receipt: {
+        confidence: calc ? 'high' : 'medium',
+        impact: 'no model compute',
+        measured: true,
+        provider: 'local-calculator',
+        expression: calc?.expression
+      },
+      meta: { query }
+    });
+    return withRouteReceipt(payload, classification);
+  }
+
+  if (classification.route === 'offline') {
+    return withRouteReceipt(offlineAnswer(query), classification);
+  }
+
+  if (classification.route === 'search') {
+    const payload = classification.label === 'Health sources'
+      ? await searchHealth(query)
+      : await searchWeb(query);
+    return withRouteReceipt(payload, classification);
+  }
+
+  if (classification.route === 'cloud') {
+    return withRouteReceipt(cloudPlaceholder(query), classification);
+  }
+
+  return withRouteReceipt(localPlaceholder(query, classification), classification);
+}
+
 function serveStatic(req, res) {
   let urlPath;
   try {
@@ -428,6 +642,7 @@ const server = http.createServer(async (req, res) => {
         uptime_seconds: Math.round(process.uptime()),
         connectors: {
           route: true,
+          answer: true,
           search: true,
           search_provider: process.env.BRAVE_SEARCH_API_KEY ? 'brave' : 'duckduckgo-fallback',
           offline: true,
@@ -440,6 +655,11 @@ const server = http.createServer(async (req, res) => {
 
     if (url.pathname === '/search') {
       sendJson(res, 200, await searchWeb(url.searchParams.get('q') || ''));
+      return;
+    }
+
+    if (url.pathname === '/answer') {
+      sendJson(res, 200, await answerQuery(url.searchParams.get('q') || ''));
       return;
     }
 

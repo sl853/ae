@@ -18,8 +18,11 @@ http://127.0.0.1:4180/
 ## What works now
 
 - No-AI calculator route
+- Unified answer route through `/answer`
 - Search route through `/search`
+- Health questions routed through trusted-source-first search
 - Offline knowledge-pack lookup through `/offline`
+- Local/cloud placeholders with the same receipt contract
 - Route explanations hidden behind Advanced
 - Quiet answer receipts
 - Local feedback stored in `localStorage`
@@ -39,19 +42,30 @@ The DuckDuckGo HTML fallback is for local prototype work only. Production should
 ```text
 GET /health
 GET /route?q=...
+GET /answer?q=...
 GET /search?q=...
 GET /offline?q=...
 ```
+
+`/answer` is the product endpoint. It classifies the request, runs the chosen route, and returns:
+
+- `answer`
+- `sources`
+- `classification`
+- `receipt` with route, confidence, privacy layers, approval status, and impact estimates
+- `meta`
+
+The older `/route`, `/search`, and `/offline` endpoints remain useful for debugging.
 
 ## Files
 
 - `index.html` — answer-first prototype UI
 - `server.js` — local router/search/offline server
 - `data/offline-pack.json` — demo offline knowledge pack
+- `FUNCTIONALITY_AUDIT.md` — product scope and backend challenge checklist
 - `ROUTER_SPEC.md` — route contract and roadmap
 - `METHODOLOGY.md` — impact measurement notes
 
 ## Production notes
 
 GitHub Pages cannot run the Node endpoints. To make the public site fully functional, deploy `server.js` or equivalent API routes on a backend host, then point the frontend at that API.
-
